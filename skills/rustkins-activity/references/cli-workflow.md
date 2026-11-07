@@ -1,6 +1,6 @@
 # Contrat CLI pour les agents
 
-Toutes les commandes ci-dessous s'exécutent dans le clone configuré de RustkinsActivity, avec `cargo run --quiet --` devant le sous-commande. Les chemins JSON peuvent être absolus. La configuration commune `~/.rustkins-skills/config.json` contient `profile`, `author`, `activity_clone`, `drafts_dir`.
+Toutes les commandes ci-dessous s'exécutent dans le clone configuré de RustkinsActivity, avec `cargo run --quiet --` avant la sous-commande. Les chemins JSON peuvent être absolus. La configuration commune `~/.rustkins-skills/config.json` contient `profile`, `author`, `activity_clone`, `drafts_dir`.
 
 ```text
 recover --drafts-dir <dossier>
