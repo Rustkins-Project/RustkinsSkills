@@ -7,7 +7,7 @@ Les deux agents reçoivent **les mêmes instructions**, le même profil humain, 
 ## Prérequis
 
 - Python 3 et Rust/Cargo, plus Git avec accès à `Rustkins-Project/RustkinsActivity`.
-- Un clone RustkinsActivity par développeur, sur `main`, dont la version contient les commandes `discover`, `prepare-create` et `prepare-patch`.
+- Un clone RustkinsActivity à jour par développeur, sur `main`, avec les commandes `discover`, `prepare-create`, `prepare-patch`, `publish` et `recover`.
 - `user.name` et `user.email` Git configurés dans ce clone. La CLI `setup` active le hook pré-commit sans écraser un hook incompatible.
 
 ## Installation Windows et Linux
@@ -28,4 +28,27 @@ Mettre à jour les clones par la procédure Git habituelle, puis relancer `pytho
 
 Lors d'un travail sur Rustkins, le skill doit être sélectionné automatiquement. Pour un premier essai explicite, utiliser `$rustkins-activity` dans Codex ou `/rustkins-activity` dans Claude Code. Le skill lit le profil configuré, récupère les transactions en attente, recherche brouillons et activités ouvertes, puis choisit la reprise ou la création. Une ambiguïté réelle nécessite la décision humaine. La CLI réalise la préparation et publication ; aucun Git manuel n'est nécessaire pour les fiches d'activité.
 
-Les exemples JSON et la liste des commandes se trouvent dans [le contrat CLI](skills/rustkins-activity/references/cli-workflow.md). Le [rapport de validation](TESTING.md) distingue les tests automatisés des essais d'agents non exécutés.
+Les exemples JSON et la liste des commandes se trouvent dans [le contrat CLI](skills/rustkins-activity/references/cli-workflow.md). Les garanties du moteur Rust (validation, brouillons, publication et reprise) sont décrites dans [RustkinsActivity](https://github.com/Rustkins-Project/RustkinsActivity#documentation-de-référence).
+
+## Vérification après installation
+
+Exécuter les tests du dépôt des skills, puis ceux de la CLI Rust (chaque commande depuis le dépôt correspondant) :
+
+```bash
+python -m unittest discover -s tests -v
+cargo test
+cargo run -- validate
+```
+
+Pour la recette fonctionnelle, utiliser **un remote Git de test isolé**, ou une véritable intervention autorisée à journaliser (éviter les fausses fiches dans le journal officiel, car les activités clôturées sont immuables). Demander à Codex de créer puis publier une activité, vérifier sa présence sur `origin/main`, la faire reprendre par Claude Code sur le même poste, puis la clôturer. Contrôler les références de PR et le résumé Discord si ce flux est configuré. Vérifier une erreur de publication en conservant le même `operation_id` et en utilisant `recover` ; ne pas créer de doublon.
+
+Les tests unitaires d'installation couvrent la configuration commune aux deux clients ; les tests de Git et du format d'activité appartiennent au dépôt RustkinsActivity. L'absence de preuve de recette sur un autre poste ne doit pas être présentée comme un test réussi.
+
+## Répartition des responsabilités
+
+- **RustkinsSkills** : installer les instructions des agents et leurs paramètres locaux.
+- **RustkinsActivity** : valider, préparer, publier et récupérer une intervention.
+- **RustkinsDocs** : gouvernance et lien avec Azure Boards.
+- **RustkinsDiscordBot** : lecture quotidienne des fiches publiées, sans écriture dans le journal.
+
+Les résultats historiques des premières vérifications restent consultables dans l'historique Git ; les commandes et scénarios ci-dessus constituent désormais la référence maintenue.
