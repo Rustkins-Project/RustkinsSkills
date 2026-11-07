@@ -40,7 +40,7 @@ cargo test
 cargo run -- validate
 ```
 
-Pour la recette fonctionnelle, faire une intervention de test dans le contexte autorisé : demander à Codex de créer puis de publier une activité, vérifier sa présence sur `origin/main`, faire reprendre **la même activité** par Claude Code sur le poste du développeur, puis la clôturer. Contrôler les références de PR et le résumé Discord si ce flux est configuré. Vérifier une erreur de publication en conservant le même `operation_id` et en utilisant `recover` ; ne pas créer de doublon.
+Pour la recette fonctionnelle, utiliser **un remote Git de test isolé**, ou une véritable intervention autorisée à journaliser (éviter les fausses fiches dans le journal officiel, car les activités clôturées sont immuables). Demander à Codex de créer puis publier une activité, vérifier sa présence sur `origin/main`, la faire reprendre par Claude Code sur le même poste, puis la clôturer. Contrôler les références de PR et le résumé Discord si ce flux est configuré. Vérifier une erreur de publication en conservant le même `operation_id` et en utilisant `recover` ; ne pas créer de doublon.
 
 Les tests unitaires d'installation couvrent la configuration commune aux deux clients ; les tests de Git et du format d'activité appartiennent au dépôt RustkinsActivity. L'absence de preuve de recette sur un autre poste ne doit pas être présentée comme un test réussi.
 
@@ -51,4 +51,4 @@ Les tests unitaires d'installation couvrent la configuration commune aux deux cl
 - **RustkinsDocs** : gouvernance et lien avec Azure Boards.
 - **RustkinsDiscordBot** : lecture quotidienne des fiches publiées, sans écriture dans le journal.
 
-Les comptes rendus historiques des premières validations restent consultables dans l'historique Git ; le fichier ponctuel `TESTING.md` n'est plus nécessaire comme documentation d'utilisation maintenue.
+Les résultats historiques des premières vérifications restent consultables dans l'historique Git ; les commandes et scénarios ci-dessus constituent désormais la référence maintenue.
