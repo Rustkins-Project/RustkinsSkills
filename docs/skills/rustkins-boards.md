@@ -1,6 +1,6 @@
 # Spécification — rustkins-boards
 
-> **Statut :** à implémenter. Source normative : [RustkinsDocs/project-management](https://github.com/Rustkins-Project/RustkinsDocs/tree/main/docs/project-management).
+> **Statut :** implémenté au jalon 3 dans [`skills/rustkins-boards/`](../../skills/rustkins-boards/), sous réserve de recette sur un projet Azure de test. Source normative : [RustkinsDocs/project-management](https://github.com/Rustkins-Project/RustkinsDocs/tree/main/docs/project-management).
 
 ## Intention et déclencheurs
 
