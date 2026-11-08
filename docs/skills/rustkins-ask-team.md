@@ -1,6 +1,6 @@
 # Spécification — rustkins-ask-team
 
-> **Statut :** à implémenter dans RustkinsSkills. **Bot existant** : aucune modification de son API requise au démarrage.
+> **Statut :** implémenté au jalon 5 dans [`skills/rustkins-ask-team/`](../../skills/rustkins-ask-team/SKILL.md). Les tests du client simulent le bot ; la recette réelle avec validation humaine reste à conduire. **Bot existant** : aucune modification de son API requise.
 > Contrat de référence : [RustkinsDiscordBot D2](https://github.com/Rustkins-Project/RustkinsDiscordBot/blob/main/docs/01-cahier-des-charges.md).
 
 ## Usage
@@ -45,7 +45,7 @@ L'URL est **illustrative** : générer les véritables liens depuis la configura
 Un script Python HTTP ciblé est justifié ici : pas de `gh`/`az` pour interagir avec les questions du bot. Le script gère JSON UTF-8, TLS, bearer, timeout, HTTP 400/401/403/404/409/429/5xx, retries prudents et idempotence.
 
 - URL de base dans la configuration locale ; token dans variable d'environnement ou coffre local hors dépôt. Ne jamais écrire le token dans `~/.rustkins-skills/config.json`, un dump d'erreur, une Activity, une PR ou Discord.
-- Les clés d'idempotence et IDs de question, **pas le texte sensible**, peuvent être conservés dans un état local minimal à la reprise ; supprimer cet état selon la politique de conservation à définir lors du code.
+- Les clés d'idempotence et IDs de question, **pas le texte sensible**, sont conservés dans un état local minimal à la reprise. La conservation est manuelle : supprimer le fichier de l'empreinte seulement après réponse validée et lorsque la reprise n'est plus nécessaire.
 - GET peut signaler un refus pour un autre auteur : ne pas réessayer avec l'identité d'un coéquipier.
 - Les sorties textuelles doivent préserver tous les accents, guillemets français, liens et caractères Unicode.
 - Le script n'a aucune intégration Azure dans le bot : les références Azure sont fournies par l'agent au moment de la requête.

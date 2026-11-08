@@ -1,6 +1,6 @@
 # Architecture cible de RustkinsSkills
 
-> **Statut :** spécification proposée, non implémentée. Les comportements décrits ici ne sont pas disponibles tant que leurs jalons ne sont pas livrés.
+> **Statut :** architecture cible ; les jalons 1 à 5 sont implémentés dans RustkinsSkills. `rustkins-knowledge`, le parcours intégré et les skills de sprint restent à livrer.
 > **Périmètre :** outillage des trois développeurs avec Codex et Claude Code ; ce projet n'est pas le moteur CI/CD Rustkins.
 
 ## Principes validés
