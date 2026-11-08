@@ -1,6 +1,6 @@
 # Plan d'implémentation de RustkinsSkills
 
-> **Plan de cadrage** : les jalons 1 et 2 fournissent l'installateur et les helpers locaux. Le jalon 3 fournit `rustkins-boards`. Les intégrations Discord, le workflow de développement et l'automatisation de sprint restent prévus pour les jalons suivants.
+> **Plan de cadrage** : les jalons 1 et 2 fournissent l'installateur et les helpers locaux ; le jalon 3 fournit `rustkins-boards` et le jalon 4 `rustkins-work`. Les intégrations Discord et l'automatisation de sprint restent prévues pour les jalons suivants.
 > **Principe de livraison :** jalons fonctionnels indépendants, PR de code courtes et revues humaines ; pas de versionnement par skill.
 
 ## Hypothèses et prérequis

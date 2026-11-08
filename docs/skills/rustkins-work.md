@@ -1,6 +1,6 @@
 # Spécification — rustkins-work
 
-> **Statut :** à implémenter. Ce skill orchestre le développement ; il ne remplace pas `rustkins-boards`, `rustkins-activity` ni les règles de RustkinsDocs.
+> **Statut :** implémenté au jalon 4 dans [`skills/rustkins-work/`](../../skills/rustkins-work/SKILL.md). Ce skill orchestre le développement ; il ne remplace pas `rustkins-boards`, `rustkins-activity` ni les règles de RustkinsDocs. La recette GitHub ↔ Azure après merge reste à conduire sur des work items de test.
 
 ## Déclenchement
 
@@ -8,7 +8,7 @@ Demandes du type « implémente AB#142 », « continue cette US », « prends la
 
 ## Parcours standard
 
-1. Contrôler les prérequis `git`, `gh`, `az` et les identités ; vérifier la propreté du worktree, le dépôt et sa branche par défaut.
+1. Contrôler les prérequis `git`, `gh` et les identités ; contrôler `az` et le contexte Azure si un work item est concerné. Vérifier la propreté du worktree, le dépôt et sa branche par défaut.
 2. Lire l'US/Task/Bug, les AC, Tasks enfants, dépendances, DoD, documents/ADR pertinents. Chercher une activité cohérente ouverte via le skill existant `rustkins-activity` : `recover`, `discover`, reprise ou création selon son contrat.
 3. Chercher les PR et branches **du développeur** et les travaux équivalents avant de créer une nouvelle branche. Ne jamais pousser dans la branche d'un autre développeur sans autorisation.
 4. Si une Task libre est prise en charge, l'attribuer au développeur avec `rustkins-boards`, la passer à `Active` selon besoin et préserver l'état d'autrui.
