@@ -1,6 +1,6 @@
 # Installation commune, configuration et qualité
 
-> **Statut :** plan d'implémentation ; `install.py` installe actuellement seulement `rustkins-activity`. Cette page décrit le comportement cible sans prétendre qu'il existe déjà.
+> **Statut :** le jalon 1 (installateur commun) est implémenté. Les nouveaux skills et leurs intégrations restent au stade de plan.
 
 ## Structure de dépôt cible
 
@@ -27,12 +27,12 @@ Les trois futurs skills `rustkins-sprint-*` seront ajoutés plus tard sous `skil
 ## Installation et mises à jour
 
 - L'installateur parcourt les dossiers valides `skills/*/SKILL.md` et copie les **mêmes sources** vers les emplacements Codex et Claude Code, y compris références/scripts.
-- Installer au besoin un sous-ensemble de skills (prérequis indépendants) et signaler ceux qui ne peuvent être utilisés. Ne pas bloquer `rustkins-activity` si Azure/Discord est inaccessible.
+- Les prérequis sont déclarés dans `skills/<nom>/requirements.json` par `commands` et, pour Azure, `azure_devops_extension`. Un skill indisponible est ignoré avec diagnostic et code retour non nul ; les autres sont installés.
 - Conserver le comportement existant : configuration locale persistante, profil réel, auteur Git, clone de RustkinsActivity, brouillons hors clone, installation sans argument après mise à jour.
 - Préserver les modifications locales de configuration, jamais écraser les tokens ; ne pas déplacer les brouillons/journal d'Activity par surprise.
-- Préparer dans un emplacement de staging, puis remplacer proprement la copie installée ; sauvegarder/restaurer les fichiers existants en cas d'erreur.
+- Préparer toutes les copies dans des dossiers temporaires voisins des destinations, puis remplacer les copies installées. Les anciennes copies modifiées sont conservées dans `<client>/skills/.rustkins-backups/` sur le même volume ; un échec de remplacement restaure les copies précédentes. Les sauvegardes de l'ancienne version sous `~/.rustkins-skills/backups/` restent intactes.
 - **Pas de versionnement de skills**, manifest semver, mécanisme de compatibilité ni auto-update en arrière-plan. Procédure : `git pull --ff-only` puis `python install.py` depuis le clone local ; redémarrer le client si nécessaire.
-- L'installateur expose un mode de vérification/diagnostic des dépendances, tests et chemins, sans lancer d'écriture distante.
+- `install.py --check` vérifie les commandes déclarées, l'extension Azure si demandée, et les chemins/configuration Activity sans installer ni exécuter `setup`. Les connexions et permissions distantes ne sont pas vérifiées à ce stade.
 
 ## Configuration locale cible
 
