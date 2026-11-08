@@ -255,12 +255,17 @@ class InstallTests(unittest.TestCase):
         (needs / "requirements.json").write_text(
             '{"commands": ["az"], "azure_devops_extension": true}', encoding="utf-8"
         )
-        with patch.object(install.subprocess, "run", return_value=SimpleNamespace(
-            returncode=0, stdout="azure-devops\n"
-        )) as run:
-            self.assertEqual(install.install(args(check=True)), [])
+        with patch.object(install.shutil, "which", side_effect=lambda name: (
+            r"C:\Program Files\Azure CLI\az.CMD" if name == "az" else "tool"
+        )):
+            with patch.object(install.subprocess, "run", return_value=SimpleNamespace(
+                returncode=0, stdout="azure-devops\n"
+            )) as run:
+                self.assertEqual(install.install(args(check=True)), [])
         run.assert_called_once()
-        self.assertEqual(run.call_args.args[0][:3], ["az", "extension", "list"])
+        self.assertEqual(run.call_args.args[0][:3], [
+            r"C:\Program Files\Azure CLI\az.CMD", "extension", "list"
+        ])
         self.assertFalse(self.home.exists())
 
     def test_check_is_read_only(self):

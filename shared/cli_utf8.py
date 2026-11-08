@@ -3,6 +3,7 @@
 import html
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 from contextlib import contextmanager
@@ -34,9 +35,18 @@ def run_cli(
 
     environment = os.environ.copy()
     environment["PYTHONIOENCODING"] = "utf-8"
+    # Windows MSI installs Azure CLI as az.cmd. Resolve it, then run its embedded
+    # Python directly so work-item text never passes through cmd.exe and %*.
+    executable = shutil.which(tool) or tool
+    command = [executable, *args]
+    if tool == "az" and Path(executable).suffix.lower() == ".cmd":
+        embedded_python = Path(executable).parent.parent / "python.exe"
+        if not embedded_python.is_file():
+            raise CliError("az : lanceur Windows non reconnu ; installation MSI Azure CLI attendue")
+        command = [str(embedded_python), "-IBm", "azure.cli", *args]
     try:
         result = subprocess.run(
-            [tool, *args],
+            command,
             cwd=cwd,
             env=environment,
             shell=False,

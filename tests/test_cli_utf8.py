@@ -14,6 +14,24 @@ FRENCH = "Échec d'exécution — coût déjà payé, è à œ « » e\u0301 �
 
 
 class CliUtf8Tests(unittest.TestCase):
+    def setUp(self):
+        self.which_patch = patch.object(cli_utf8.shutil, "which", side_effect=lambda name: name)
+        self.which_patch.start()
+        self.addCleanup(self.which_patch.stop)
+
+    def test_windows_cmd_uses_embedded_python_without_shell(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "wbin").mkdir()
+            (root / "python.exe").touch()
+            launcher = root / "wbin" / "az.CMD"
+            with patch.object(cli_utf8.shutil, "which", return_value=str(launcher)):
+                with patch.object(cli_utf8.subprocess, "run", return_value=SimpleNamespace(
+                    returncode=0, stdout="{}", stderr=""
+                )) as run:
+                    cli_utf8.run_json("az", ["version", "-o", "json"])
+        self.assertEqual(run.call_args.args[0][:3], [str(root / "python.exe"), "-IBm", "azure.cli"])
+        self.assertFalse(run.call_args.kwargs["shell"])
     def test_az_json_preserves_unicode_and_uses_no_shell(self):
         payload = {"title": FRENCH, "description": "<p>É & œ</p>"}
         output = json.dumps(payload, ensure_ascii=False)

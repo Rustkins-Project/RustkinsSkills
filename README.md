@@ -1,17 +1,17 @@
 # RustkinsSkills
 
-Skills partagés par Codex et Claude Code pour les dépôts Rustkins. Le premier skill, [`rustkins-activity`](skills/rustkins-activity/SKILL.md), gère le journal d'intervention au moyen de la CLI Rust de [RustkinsActivity](https://github.com/Rustkins-Project/RustkinsActivity). L'installateur découvre automatiquement les dossiers `skills/*/SKILL.md` et copie leurs ressources dans les deux clients.
+Skills partagés par Codex et Claude Code pour les dépôts Rustkins. [`rustkins-activity`](skills/rustkins-activity/SKILL.md) gère le journal d'intervention au moyen de la CLI Rust de [RustkinsActivity](https://github.com/Rustkins-Project/RustkinsActivity). [`rustkins-boards`](skills/rustkins-boards/SKILL.md) consulte et tient à jour Azure Boards. L'installateur découvre automatiquement les dossiers `skills/*/SKILL.md` et copie leurs ressources dans les deux clients.
 
 Les deux agents reçoivent **les mêmes instructions**, le même profil humain, le même clone RustkinsActivity et le même dossier de brouillons. La recherche contextuelle et les décisions de reprise sont dans le skill ; le format, la validation, les opérations ciblées, le verrou et Git restent dans RustkinsActivity. Les règles transverses Azure sont dans RustkinsDocs.
 
-## Roadmap des skills (conception, non encore implémentée)
+## Roadmap des skills
 
-Le dépôt contient aujourd'hui seulement le skill opérationnel `rustkins-activity`. Les autres skills ci-dessous sont **spécifiés mais pas encore disponibles** ; ne pas supposer qu'ils sont installés ou testés.
+Les deux premiers skills sont opérationnels. Les autres sont **spécifiés mais pas encore disponibles** ; ne pas supposer qu'ils sont installés ou testés.
 
 | Premier lot | Objectif |
 | --- | --- |
 | `rustkins-activity` (existant) | Journal Git via la CLI RustkinsActivity |
-| `rustkins-boards` (à créer) | Azure Boards via `az` ; Tasks, US, Bugs, états, relations, DoR/DoD |
+| `rustkins-boards` (disponible) | Azure Boards via `az` ; Tasks, US, Bugs, états, relations, DoR/DoD |
 | `rustkins-work` (à créer) | Développement autonome jusqu'à la PR ; Git/`gh`, tests, review humaine |
 | `rustkins-ask-team` (à créer) | Questions et réponses validées via l'API privée RustkinsDiscordBot |
 | `rustkins-knowledge` (à créer) | Recherche/contribution à RustkinsDocs, ADR proposées par PR |
@@ -26,6 +26,7 @@ Choix structurants : `gh` et `az` en priorité ; API directe seulement lorsque p
 
 - Python 3 pour l'installateur. Chaque skill peut déclarer ses propres outils dans `requirements.json`.
 - Pour `rustkins-activity` : Git, Rust/Cargo et un clone RustkinsActivity à jour, sur `main`, avec les commandes `discover`, `prepare-create` et `prepare-patch`.
+- Pour `rustkins-boards` : Azure CLI avec l'extension `azure-devops`, accès au projet Azure et configuration `--azure-organization` / `--azure-project`.
 - `user.name` et `user.email` Git configurés dans ce clone. La CLI `setup` active le hook pré-commit sans écraser un hook incompatible.
 
 ## Installation Windows et Linux
@@ -38,7 +39,7 @@ python install.py --profile Timothy --author <login-GitHub> --activity-clone <ch
 
 Remplacer `Timothy` par `Alexis` ou `Loick` selon le poste. L'installateur crée `~/.rustkins-skills/config.json`, active le hook du clone Activity, copie chaque skill disponible vers `~/.codex/skills/<nom>` et `~/.claude/skills/<nom>`, et installe les helpers communs sous `~/.rustkins-skills/shared/`. Le dossier de brouillons reste hors clone et n'est jamais effacé par l'installateur. Relancer les clients si leurs skills sont chargés au démarrage.
 
-Les champs futurs sont facultatifs : `--docs-clone`, `--azure-organization`, `--azure-project` et `--discord-base-url`. Ils alimentent respectivement `docs_clone`, `azure.organization`, `azure.project` et `discord.base_url` dans le même JSON UTF-8. Ne pas y placer de token ou de PAT. Les clés déjà présentes sont conservées si leurs options ne sont pas fournies.
+Les champs `--docs-clone`, `--azure-organization`, `--azure-project` et `--discord-base-url` sont facultatifs à l'installation. Ils alimentent respectivement `docs_clone`, `azure.organization`, `azure.project` et `discord.base_url` dans le même JSON UTF-8. Les deux options Azure sont nécessaires pour utiliser `rustkins-boards`. Ne pas y placer de token ou de PAT. Les clés déjà présentes sont conservées si leurs options ne sont pas fournies.
 
 ## Mise à jour
 
@@ -55,6 +56,8 @@ Pour ajouter un skill, créer `skills/<nom>/SKILL.md` et placer ses ressources r
 ## Socle CLI et UTF-8
 
 Le module [`shared/cli_utf8.py`](shared/cli_utf8.py) est installé une seule fois sous `~/.rustkins-skills/shared/`, utilisable par les scripts des futurs skills. Il fournit `run_cli` et `run_json` pour `az` et `gh` avec liste d'arguments, sans shell, sortie UTF-8 stricte et délai contrôlé ; `read_utf8`, `write_utf8`, `read_json` et `write_json` pour les fichiers ; `plain_text_to_html` pour un champ HTML issu de texte brut ; et `temporary_markdown` pour un fichier UTF-8 fermé avant `gh --body-file`.
+
+Pour créer **ou modifier** une description de PR sous PowerShell, suivre la [procédure de conservation du Markdown](docs/installation-and-quality.md#corps-de-pr-multiligne-dans-powershell) et comparer le corps publié au fichier source.
 
 Un script installé peut importer ce module ainsi :
 
@@ -73,6 +76,8 @@ Les exceptions `CliError` indiquent l'outil et la catégorie d'échec sans repro
 Lors d'un travail sur Rustkins, le skill doit être sélectionné automatiquement. Pour un premier essai explicite, utiliser `$rustkins-activity` dans Codex ou `/rustkins-activity` dans Claude Code. Le skill lit le profil configuré, récupère les transactions en attente, recherche brouillons et activités ouvertes, puis choisit la reprise ou la création. Une ambiguïté réelle nécessite la décision humaine. La CLI réalise la préparation et publication ; aucun Git manuel n'est nécessaire pour les fiches d'activité.
 
 Les exemples JSON et la liste des commandes se trouvent dans [le contrat CLI](skills/rustkins-activity/references/cli-workflow.md). Les garanties du moteur Rust (validation, brouillons, publication et reprise) sont décrites dans [RustkinsActivity](https://github.com/Rustkins-Project/RustkinsActivity#documentation-de-référence).
+
+Pour Azure Boards, invoquer `$rustkins-boards` dans Codex ou `/rustkins-boards` dans Claude Code. Le [guide Azure](skills/rustkins-boards/references/az-workflow.md) montre la recherche, la création/reprise d'une Task, son attribution et ses transitions d'avancement. Les tests automatisés simulent le CLI ; ils ne modifient pas le backlog réel.
 
 ## Vérification après installation
 

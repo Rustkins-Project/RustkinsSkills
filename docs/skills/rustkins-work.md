@@ -63,7 +63,7 @@ Une PR finale pouvant clôturer ses dernières Tasks lors du même événement q
 - Nom de branche recommandé : `feature/<us-id>-<slug>`, `task/<id>-<slug>`, `fix/<bug-id>-<slug>` ; ajouter un suffixe pour plusieurs PR sans collisions.
 - Pour chaque repo : une branche/PR **dans ce repo** ; une PR ne peut pas traverser plusieurs dépôts.
 - Travailler sur une branche de travail dédiée ; jamais pousser `main` pour le code.
-- `gh pr create --body-file <fichier-utf8>` pour les descriptions longues ; utiliser `gh pr edit` quand il faut modifier références et transitions. Ne pas compter sur le titre seul pour la liaison Azure.
+- Utiliser `gh pr create --body-file <fichier-utf8>` puis `gh pr edit <numéro> --body-file <fichier-utf8>` pour toute description multiligne, y compris les corrections de review. Suivre la [procédure PowerShell et sa vérification du corps publié](../installation-and-quality.md#corps-de-pr-multiligne-dans-powershell). Ne pas compter sur le titre seul pour la liaison Azure.
 - Les mentions `AB#...` dans les commits sont à considérer avec prudence : aucun verbe de fermeture involontaire.
 - La PR doit décrire la cible, les Tasks terminées, le plan de tests, les risques, les preuves et les dépendances de merge.
 
