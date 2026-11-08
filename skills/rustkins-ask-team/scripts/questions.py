@@ -85,16 +85,6 @@ def state_path(home, digest):
 def save_state(path, state, *, create=False):
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     payload = json.dumps(state, ensure_ascii=False, indent=2) + "\n"
-    if create:
-        try:
-            with path.open("x", encoding="utf-8", newline="\n") as stream:
-                os.chmod(path, 0o600)
-                stream.write(payload)
-                stream.flush()
-                os.fsync(stream.fileno())
-        except FileExistsError:
-            return False
-        return True
     temporary = path.with_name(f".{path.stem}.{uuid.uuid4()}.tmp")
     try:
         with temporary.open("x", encoding="utf-8", newline="\n") as stream:
@@ -102,6 +92,12 @@ def save_state(path, state, *, create=False):
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
+        if create:
+            try:
+                os.link(temporary, path)
+            except FileExistsError:
+                return False
+            return True
         os.replace(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)

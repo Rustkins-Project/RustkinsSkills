@@ -119,6 +119,18 @@ class QuestionTests(unittest.TestCase):
         self.assertNotEqual(first["idempotency_key"], second["idempotency_key"])
         self.assertEqual(len(questions.list_questions(self.home)), 1)
 
+    def test_interrupted_initial_write_leaves_no_final_state(self):
+        digest = questions.fingerprint(self.content)
+        path = questions.state_path(self.home, digest)
+        with patch.object(questions.os, "fsync", side_effect=OSError("interrupted")):
+            with self.assertRaises(OSError):
+                questions.prepare(self.home, self.input)
+        self.assertFalse(path.exists())
+        self.assertEqual(list(path.parent.glob("*.tmp")), [])
+        self.assertEqual(questions.list_questions(self.home), [])
+        prepared = questions.prepare(self.home, self.input)
+        self.assertEqual(questions.prepare(self.home, self.input), prepared)
+
     def test_auth_error_never_exposes_token_or_response(self):
         questions.prepare(self.home, self.input)
         error = urllib.error.HTTPError("https://bot.example.test", 401, "private response", {}, None)
