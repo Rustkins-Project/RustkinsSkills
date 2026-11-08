@@ -43,7 +43,8 @@ def run_cli(
         embedded_python = Path(executable).parent.parent / "python.exe"
         if not embedded_python.is_file():
             raise CliError("az : lanceur Windows non reconnu ; installation MSI Azure CLI attendue")
-        command = [str(embedded_python), "-IBm", "azure.cli", *args]
+        # -I ignores PYTHONIOENCODING, so force UTF-8 before Azure CLI starts.
+        command = [str(embedded_python), "-X", "utf8", "-IBm", "azure.cli", *args]
     try:
         result = subprocess.run(
             command,
