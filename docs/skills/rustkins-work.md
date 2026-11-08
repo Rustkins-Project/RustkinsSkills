@@ -1,6 +1,6 @@
 # Spécification — rustkins-work
 
-> **Statut :** implémenté au jalon 4 dans [`skills/rustkins-work/`](../../skills/rustkins-work/SKILL.md). Ce skill orchestre le développement ; il ne remplace pas `rustkins-boards`, `rustkins-activity` ni les règles de RustkinsDocs. La recette GitHub ↔ Azure après merge reste à conduire sur des work items de test.
+> **Statut :** implémenté au jalon 4 dans [`skills/rustkins-work/`](../../skills/rustkins-work/SKILL.md). Ce skill orchestre le développement ; il ne remplace pas `rustkins-boards`, `rustkins-activity` ni les règles de RustkinsDocs. La recette GitHub ↔ Azure a vérifié sur le projet `Test` la liaison PR/work items, la clôture d'une Task au merge et le passage d'une US à `Resolved` au merge d'une PR distincte. La clôture `Closed` d'une US reste réservée à la Sprint Review humaine.
 
 ## Déclenchement
 

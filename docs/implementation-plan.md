@@ -1,7 +1,6 @@
-# Plan d'implémentation de RustkinsSkills
+# Bilan d'implémentation de RustkinsSkills
 
-> **Plan de cadrage** : les jalons 1 et 2 fournissent l'installateur et les helpers locaux ; les jalons 3 à 6 fournissent les quatre nouveaux skills du premier lot. Le jalon 7 a couvert un parcours intégré réel sur données de test ; le jalon 8 fournit les trois skills de sprint. Leur recette sur une itération réelle reste à faire.
-> **Principe de livraison :** jalons fonctionnels indépendants, PR de code courtes et revues humaines ; pas de versionnement par skill.
+> **Statut au 9 novembre 2026 :** les jalons 1 à 8 sont livrés sur `main` : installateur, helpers, huit skills et recette intégrée sur données de test. La recette des trois skills de sprint sur une itération réelle, avec Sprint Review et rétrospective, reste à conduire. Ce document conserve les critères de conception et les scénarios pour les vérifications futures.
 
 ## Hypothèses et prérequis
 
@@ -12,21 +11,21 @@
 - `RustkinsDiscordBot` expose déjà POST/GET `/internal/questions`. Pas de nouvelle API à coder pour le premier lot.
 - Aucun composant de `RustkinsMCP` n'est requis.
 
-## Ordre et dépendances
+## Jalons livrés et limites de recette
 
-| Étape | Livraison de code attendue | Dépendances | Critère de recette |
-| --- | --- | --- | --- |
-| **0 — Alignement documentaire** | Faire reviewer/merger les PR de cadrage Skills, Docs et DiscordBot | Aucune | Les textes normatifs ne se contredisent pas ; cas `Resolved` et DoD explicités |
-| **1 — Installateur commun** | Détection et installation de tous les dossiers `skills/*`, références, scripts ; configuration persistante ; diagnostics des outils | 0 | Codex et Claude voient les mêmes cinq entrées à terme ; `rustkins-activity` reste fonctionnel |
-| **2 — Socle CLI/UTF-8** | Helpers partagés minimaux pour lancer `az`/`gh` sans shell et pour fichiers JSON/HTML/Markdown UTF-8 ; tests Windows/Linux | 1 | Titres et descriptions accentués intacts ; erreurs et sorties JSON exploitables ; aucun secret divulgué |
-| **3 — rustkins-boards** | SKILL, références opérationnelles, scripts seulement où utiles | 2 | Recherche, lecture complète des champs et relations, création/reprise Task, attribution à la prise en charge, mutation sûre, DoD |
-| **4 — rustkins-work** | SKILL, instructions branches/PR/reviews, template de PR ; coordination Activity/Boards | 3 | Une US existante → Tasks → code/tests → PR ; liens Azure valides ; aucune fusion par agent |
-| **5 — rustkins-ask-team** | SKILL + client HTTP local ciblé, durablement reprenable, tests simulés | 2 | Question créée une seule fois, réponse pending/answered, récupération après nouvelle session |
-| **6 — rustkins-knowledge** | SKILL, navigation du clone Docs et contribution par PR/ADR | 2 | Recherche sur sources pertinentes, contribution sans doublon, ADR proposée sans auto-approbation |
-| **7 — Premier parcours intégré** | Ajustements et tests d'acceptation inter-skills, documentation du poste | 3–6 | Scénarios end-to-end décrits ci-dessous réussis sur données de test |
-| **8 — Sprint skills** | `rustkins-sprint-planning`, `rustkins-sprint-status`, `rustkins-sprint-close` (trois PR possibles) | 3,6,7 | Planning validé, suivi fiable, review/rétro et report dans les règles Azure |
+| Étape | Livraison sur `main` | Recette et limite |
+| --- | --- | --- |
+| **0 — Alignement documentaire** | Cadrage Skills, Docs et DiscordBot | Les règles de DoD et de transitions ont été alignées. |
+| **1 — Installateur commun** | Installation dynamique de tous les dossiers `skills/*` pour Codex et Claude Code | `install.py --check` reconnaît les huit skills ; installation sur ce poste vérifiée. |
+| **2 — Socle CLI/UTF-8** | Helpers `az`/`gh`, JSON, HTML et Markdown UTF-8 | Tests Windows et Linux réussis ; lancement Azure CLI Windows et corps de PR multiligne corrigés. |
+| **3 — rustkins-boards** | Skill, guide Azure et scripts de mutation | Lecture, création de Task et transitions vérifiées sur le projet Azure `Test`. |
+| **4 — rustkins-work** | Skill, guide de PR et modèle de corps | Liaison de PR et transitions natives après merge vérifiées avec `test#2` et `test#3`. |
+| **5 — rustkins-ask-team** | Skill et client HTTP local reprenable | Question réelle publiée sur le bot local ; réponse humaine validée relue. |
+| **6 — rustkins-knowledge** | Skill de recherche et contribution documentaire | Recherche de source approuvée vérifiée ; aucune ADR réelle proposée ou approuvée pendant la recette. |
+| **7 — Premier parcours intégré** | Ajustements d'intégration et recette des cinq premiers skills | Parcours sur données de test vérifié ; US `Resolved` contrôlée après merge, sans clôture `Closed` hors review. |
+| **8 — Skills de sprint** | `rustkins-sprint-planning`, `rustkins-sprint-status`, `rustkins-sprint-close` | Tests automatisés Windows/Linux réussis ; aucune recette complète sur une itération réelle. |
 
-Les cinq skills constituent le **premier lot fonctionnel**. Les trois skills de sprint forment le jalon 8, après la stabilisation des opérations de base.
+Les cinq skills du premier lot et les trois skills de sprint sont disponibles. Le tableau distingue le code livré des parcours effectivement exercés.
 
 ## Critères de livraison par étape
 
@@ -72,13 +71,11 @@ Les cinq skills constituent le **premier lot fonctionnel**. Les trois skills de 
 7. **Discord** : POST idempotent, GET pending, puis answered après validation humaine ; aucune réponse supposée.
 8. **Sprint** : pas de réaffectation silencieuse, pas d'US ajoutée au sprint sans arbitrage, report correct, bilan ne compte comme livrés que les SP des US `Closed` en Sprint Review.
 
-## Organisation des PR de développement
+## Vérifications encore nécessaires
 
-Chaque étape peut être confiée à un agent IA. Sa PR doit contenir : portée précise, fichiers concernés, tests exécutés et résultats réels, captures d'output utiles, risques et dépendances, références Azure si elles existent. Les PR ne sont pas fusionnées par l'agent. Les cas d'acceptation ci-dessus constituent la base des tests, pas une autorisation de modifier RustkinsDocs à volonté.
-
-### Brief réutilisable à donner à l'agent
-
-> Implémente **l'étape N** de `RustkinsSkills/docs/implementation-plan.md`. Lis `docs/architecture.md`, `docs/installation-and-quality.md`, la spécification du skill, et les règles RustkinsDocs pertinentes. Ne développe pas d'autre étape. Préserve `rustkins-activity`, utilise d'abord `gh`, `git` et `az`, réserve les API directes aux cas justifiés, teste le français en UTF-8 sur les plateformes disponibles. Crée une branche et une PR sans merge, avec tests, preuves, limites et références Azure réelles. Si une décision fonctionnelle ou une ADR nouvelle est indispensable, pose la question plutôt que d'inventer l'arbitrage.
+- Exercer `rustkins-sprint-planning`, `rustkins-sprint-status` et `rustkins-sprint-close` sur une itération Azure réelle, avec sélection humaine, dates, disponibilités, Sprint Review et rétrospective.
+- Tester une contribution ADR réelle seulement lorsqu'une décision documentaire le justifie ; son approbation et sa fusion restent humaines.
+- Conserver les scénarios transverses ci-dessus pour les régressions et vérifier les états Azure réellement persistés après chaque merge.
 
 ## Risques à contrôler
 

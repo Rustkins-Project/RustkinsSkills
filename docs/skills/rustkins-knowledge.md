@@ -1,6 +1,6 @@
 # Spécification — rustkins-knowledge
 
-> **Statut :** implémenté au jalon 6 dans [`skills/rustkins-knowledge/`](../../skills/rustkins-knowledge/SKILL.md). La recette d'une vraie contribution ADR/PR reste à conduire lors d'une demande documentaire. Source canonique : [conventions RustkinsDocs](https://github.com/Rustkins-Project/RustkinsDocs/blob/main/docs/conventions/knowledge-management.md).
+> **Statut :** implémenté au jalon 6 dans [`skills/rustkins-knowledge/`](../../skills/rustkins-knowledge/SKILL.md). La recherche de source approuvée a été vérifiée pendant la recette intégrée ; une contribution documentaire par PR est préparée dans le cadre de l'alignement global des guides. Aucune proposition d'ADR réelle n'a encore été exercée. Source canonique : [conventions RustkinsDocs](https://github.com/Rustkins-Project/RustkinsDocs/blob/main/docs/conventions/knowledge-management.md).
 
 ## Objectifs
 

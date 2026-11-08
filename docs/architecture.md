@@ -1,12 +1,12 @@
-# Architecture cible de RustkinsSkills
+# Architecture de RustkinsSkills
 
-> **Statut :** architecture cible ; les jalons 1 à 6 et les skills de sprint du jalon 8 sont implémentés. La recette intégrée du jalon 7 a vérifié les liens et transitions GitHub/Azure ainsi que la réponse Discord validée ; les cas de sprint demandent encore une recette sur une itération réelle.
+> **Statut :** huit skills implémentés. La recette intégrée a vérifié les liens et transitions GitHub/Azure ainsi que la réponse Discord validée sur des données de test. Les cas de sprint demandent encore une recette sur une itération réelle.
 > **Périmètre :** outillage des trois développeurs avec Codex et Claude Code ; ce projet n'est pas le moteur CI/CD Rustkins.
 
 ## Principes validés
 
 1. **Cinq skills dans le premier lot** : `rustkins-activity` (existant), `rustkins-boards`, `rustkins-work`, `rustkins-ask-team`, `rustkins-knowledge`.
-2. **Skills de sprint dédiés ensuite** : `rustkins-sprint-planning`, `rustkins-sprint-status`, `rustkins-sprint-close`. Leur contrat est conçu dès maintenant.
+2. **Trois skills de sprint disponibles** : `rustkins-sprint-planning`, `rustkins-sprint-status`, `rustkins-sprint-close`.
 3. `gh` + `git` pour GitHub et les dépôts locaux, `az` + extension `azure-devops` pour Azure Boards. Les appels HTTP directs restent permis **en cas de besoin avéré** ; Discord Bot utilise nécessairement son API privée. Ne pas reconstruire un serveur intermédiaire.
 4. `RustkinsMCP` est **historique seulement**, jamais une dépendance d'installation ou d'exécution ; ne pas réutiliser son journal SQLite.
 5. Les agents réalisent le développement jusqu'à la PR prête à revoir, **sans demander une validation supplémentaire** pour brancher, coder, tester, committer, pousser et ouvrir la PR. Review et merge humains, jamais par l'agent.
@@ -29,7 +29,7 @@ Un skill décrit **les décisions de l'agent** et délègue les opérations dét
 ### Composition
 
 - `rustkins-work` coordonne, selon le besoin, `boards`, `activity`, `knowledge` et `ask-team` ; il ne copie pas leurs contrats.
-- Chacun des quatre autres skills est également utilisable directement : par exemple « liste les Tasks du sprint » n'ouvre pas de branche.
+- Chaque autre skill est également utilisable directement : par exemple « liste les Tasks du sprint » n'ouvre pas de branche.
 - Les scripts locaux sont réservés à l'encodage des payloads complexes, à la validation, à la réconciliation, aux prérequis et aux opérations répétitives sujettes aux erreurs ; **pas de wrapper systématique pour chaque commande CLI**.
 - Une décision issue de Discord n'est pas automatiquement une ADR acceptée. Une Activity terminée ne signifie ni Task Azure `Closed`, ni US `Resolved`.
 
@@ -50,7 +50,7 @@ En cas d'erreur, ne jamais afficher de succès non vérifié. Rechercher l'état
 
 ## Contrats et documentation
 
-- [Plan d'implémentation](implementation-plan.md)
+- [Bilan des jalons et scénarios de recette](implementation-plan.md)
 - [Configuration, UTF-8 et recette](installation-and-quality.md)
 - [Boards](skills/rustkins-boards.md) · [Work](skills/rustkins-work.md) · [Ask team](skills/rustkins-ask-team.md) · [Knowledge](skills/rustkins-knowledge.md)
 - [Skills de sprint](skills/sprints.md)
