@@ -51,7 +51,7 @@ Les cinq skills sont le **premier lot fonctionnel** ; les skills de sprint reste
 - Recherche d'Activity en cours, d'US/Tasks, branches et PR avant création.
 - Une PR par US **par défaut** ; plusieurs PR et plusieurs repos autorisés si nécessaire ; chaque Task est clôturable par **la PR qui finit cette Task**.
 - PR intermédiaires : `AB#<us>` + `Closed AB#<task>` pour chaque Task réellement achevée.
-- PR finale : `Resolved AB#<us>` **uniquement** lorsque les autres PR sont déjà mergées et que les AC, tests, toutes les Tasks et la plateforme de test satisfont la DoD ; sinon simple `AB#<us>`.
+- PR finale : `Resolved AB#<us>` **uniquement** lorsque les autres PR sont déjà mergées, les AC/tests/validation de test sont prouvés et les dernières Tasks seront clôturées au même merge ; vérifier ensuite que toutes les Tasks sont réellement `Closed` et l'US `Resolved`. Si les états ne peuvent pas évoluer simultanément ou si la validation est post-merge, utiliser `AB#<us>` puis passer l'US à `Resolved` après vérification.
 - Pour Bug/Task autonome, `Closed AB#<id>` sur la PR terminant le travail.
 - Aucun `Resolved` anticipé : si la plateforme de test n'est disponible qu'après merge, l'agent finalise alors l'US via `az` après vérification effective.
 - CI et review humaine avant merge ; GitHub/Azure natif pour liens et transitions, **pas de GitHub Action de clôture personnalisée** dans ce lot.
