@@ -2,7 +2,7 @@
 
 > **Statut :** l'installateur et le socle CLI/UTF-8 sont implémentés ; les huit skills du premier lot et des sprints sont présents. Les scénarios de sprint attendent une recette sur une itération réelle.
 
-## Structure de dépôt cible
+## Structure du dépôt
 
 ```text
 RustkinsSkills/
@@ -10,20 +10,20 @@ RustkinsSkills/
 ├── shared/
 │   └── cli_utf8.py              # helpers installés sous ~/.rustkins-skills/shared/
 ├── skills/
-│   ├── rustkins-activity/          # existant, à préserver
+│   ├── rustkins-activity/          # skill du journal Git
 │   │   ├── SKILL.md
 │   │   └── references/
 │   ├── rustkins-boards/
 │   │   ├── SKILL.md
 │   │   ├── references/
-│   │   └── scripts/               # seulement si nécessaires
+│   │   └── scripts/
 │   ├── rustkins-work/
 │   ├── rustkins-ask-team/
 │   ├── rustkins-knowledge/
 │   ├── rustkins-sprint-planning/
 │   ├── rustkins-sprint-status/
 │   └── rustkins-sprint-close/
-├── docs/                           # spécifications et plan
+├── docs/                           # guides, contrats et bilan des jalons
 └── tests/
 ```
 
@@ -40,7 +40,7 @@ Les trois skills `rustkins-sprint-*` sont découverts par le même installateur.
 - **Pas de versionnement de skills**, manifest semver, mécanisme de compatibilité ni auto-update en arrière-plan. Procédure : `git pull --ff-only` puis `python install.py` depuis le clone local ; redémarrer le client si nécessaire.
 - `install.py --check` vérifie les commandes déclarées, l'extension Azure si demandée, et les chemins/configuration Activity sans installer ni exécuter `setup`. Les connexions et permissions distantes ne sont pas vérifiées à ce stade.
 
-## Configuration locale cible
+## Configuration locale
 
 Exemple **illustratif**, sans secret :
 
@@ -61,14 +61,14 @@ Exemple **illustratif**, sans secret :
 }
 ```
 
-Les chemins sont propres au poste. L'URL `.invalid` est un exemple fictif, pas une valeur à installer. Migrer **les clés déjà existantes** sans casser les postes et sans ajout de version de schéma. La configuration représente des préférences, pas une autorisation : les commandes vérifient toujours permissions et contexte distant.
+Les chemins sont propres au poste. L'URL `.invalid` est un exemple fictif, pas une valeur à installer. Une réinstallation conserve les clés déjà configurées sans ajouter de version de schéma. La configuration représente des préférences, pas une autorisation : les commandes vérifient toujours permissions et contexte distant.
 
 ### Préflight
 
 - `python` ou `python3`, `git`, `gh`, `az`, extension `azure-devops`, authentification du compte et bon projet ; Rust/Cargo pour le skill Activity existant.
 - Ne pas forcer la connexion Azure/GitHub au moment d'installer un skill non concerné ; afficher un état par skill et le remède recommandé.
 - La configuration Azure doit pointer sur le bon projet avant tout appel de mutation. Ne jamais supposer qu'un `az devops configure` précédent correspond au projet Rustkins.
-- Les appels Discord exigent HTTPS et un token client externe à la configuration JSON. Pour la recette locale uniquement, le client accepte HTTP sur les adresses littérales de boucle locale `127.0.0.1` et `::1` ; aucune autre adresse HTTP n'est autorisée. Prévoir une lecture sûre du token depuis une variable d'environnement ou un coffre OS.
+- Les appels Discord exigent HTTPS et un token client externe à la configuration JSON. Pour la recette locale uniquement, le client accepte HTTP sur les adresses littérales de boucle locale `127.0.0.1` et `::1` ; aucune autre adresse HTTP n'est autorisée. Le client lit le jeton depuis `RUSTKINS_DISCORD_AI_TOKEN`.
 - La validation post-installation vérifie que Codex **et** Claude Code possèdent des copies fonctionnelles et identiques.
 
 ## Internationalisation et UTF-8

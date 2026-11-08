@@ -1,6 +1,6 @@
 # Spécification — rustkins-ask-team
 
-> **Statut :** implémenté au jalon 5 dans [`skills/rustkins-ask-team/`](../../skills/rustkins-ask-team/SKILL.md). Les tests du client simulent le bot ; la recette réelle avec validation humaine reste à conduire. **Bot existant** : aucune modification de son API requise.
+> **Statut :** implémenté au jalon 5 dans [`skills/rustkins-ask-team/`](../../skills/rustkins-ask-team/SKILL.md). Les tests du client simulent le bot ; une recette réelle a vérifié la publication d'une question et la lecture de la réponse validée humainement. **Bot existant** : aucune modification de son API requise.
 > Contrat de référence : [RustkinsDiscordBot D2](https://github.com/Rustkins-Project/RustkinsDiscordBot/blob/main/docs/01-cahier-des-charges.md).
 
 ## Usage
