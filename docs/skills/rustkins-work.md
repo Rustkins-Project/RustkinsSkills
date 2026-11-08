@@ -37,7 +37,7 @@ Closed AB#151
 Closed AB#152
 ```
 
-Pour la PR **finale** terminant la Task `153`, et **seulement si** l'ensemble de la DoD de l'US est vérifié **avant merge** :
+Pour la PR **finale** terminant la Task `153`, et **seulement si** les preuves AC/tests/déploiement E2E existent **avant merge** et que les dernières Tasks seront clôturées par ce merge :
 
 ```text
 Resolved AB#142
@@ -54,7 +54,7 @@ Référence : https://learn.microsoft.com/en-us/azure/devops/boards/github/link-
 
 La « dernière PR créée » n'est **pas** nécessairement la « dernière mergée » : les précédentes doivent être intégrées avant le merge final. Les agents préparent des liens/une dépendance de review explicites et vérifient les autres PR en cours. Si la situation évolue avant merge, modifier la description de la PR finale et retirer le mot-clé `Resolved` tant que la DoD n'est plus certaine.
 
-La **DoD officielle de l'US** comporte les AC, toutes les Tasks `Closed`, tests unitaires, intégration et E2E, déploiement sur la plateforme de test et preuves de la révision réellement testée. **Ne pas changer la DoD par commodité.** Si le déploiement/test E2E n'est possible qu'après merge, utiliser `AB#142` sans `Resolved`, puis faire passer l'US à `Resolved` via `rustkins-boards` après constat du résultat. L'US n'est `Closed` qu'à la Sprint Review.
+La **DoD officielle de l'US** comporte les AC, toutes les Tasks `Closed`, tests unitaires, intégration et E2E, déploiement sur la plateforme de test et preuves de la révision réellement testée. **Ne pas changer la DoD par commodité.** Les dernières Tasks peuvent devenir `Closed` pendant le même merge que la demande `Resolved`. Vérifier **après merge** que toutes les Tasks sont réellement `Closed` et l'US `Resolved`, sans présumer d'un ordre des transitions. Si Azure refuse les transitions simultanées, ou si le déploiement/test E2E n'est possible qu'après merge, utiliser `AB#142` sans `Resolved`, puis résoudre l'US via `rustkins-boards` après constat de la DoD complète. L'US n'est `Closed` qu'à la Sprint Review.
 
 Une PR finale pouvant clôturer ses dernières Tasks lors du même événement que la demande de `Resolved`, ne pas supposer que l'application effectue ces transitions dans un ordre garanti. Prévoir une **vérification post-merge au prochain point de contrôle** pour constater les états et traiter un éventuel échec.
 
