@@ -1,6 +1,6 @@
 # Plan d'implémentation de RustkinsSkills
 
-> **Documents de cadrage uniquement** : aucun skill nouveau, aucun script d'intégration Azure/Discord ni automatisation de sprint ne sont implémentés par cette PR.
+> **Plan de cadrage** : les jalons 1 et 2 fournissent l'installateur et les helpers locaux. Aucun nouveau skill, script d'intégration Azure/Discord ni automatisation de sprint n'est inclus dans ces jalons.
 > **Principe de livraison :** jalons fonctionnels indépendants, PR de code courtes et revues humaines ; pas de versionnement par skill.
 
 ## Hypothèses et prérequis

@@ -1,12 +1,14 @@
 # Installation commune, configuration et qualité
 
-> **Statut :** le jalon 1 (installateur commun) est implémenté. Les nouveaux skills et leurs intégrations restent au stade de plan.
+> **Statut :** les jalons 1 et 2 (installateur et socle CLI/UTF-8) sont implémentés. Les nouveaux skills et leurs intégrations restent au stade de plan.
 
 ## Structure de dépôt cible
 
 ```text
 RustkinsSkills/
 ├── install.py
+├── shared/
+│   └── cli_utf8.py              # helpers installés sous ~/.rustkins-skills/shared/
 ├── skills/
 │   ├── rustkins-activity/          # existant, à préserver
 │   │   ├── SKILL.md
@@ -27,6 +29,7 @@ Les trois futurs skills `rustkins-sprint-*` seront ajoutés plus tard sous `skil
 ## Installation et mises à jour
 
 - L'installateur parcourt les dossiers valides `skills/*/SKILL.md` et copie les **mêmes sources** vers les emplacements Codex et Claude Code, y compris références/scripts.
+- Le dossier `shared/` est copié une fois sous `~/.rustkins-skills/shared/` avec la même préparation, sauvegarde et restauration que les skills. Les caches Python générés localement sont ignorés.
 - Les prérequis sont déclarés dans `skills/<nom>/requirements.json` par `commands` et, pour Azure, `azure_devops_extension`. Un skill indisponible est ignoré avec diagnostic et code retour non nul ; les autres sont installés.
 - Conserver le comportement existant : configuration locale persistante, profil réel, auteur Git, clone de RustkinsActivity, brouillons hors clone, installation sans argument après mise à jour.
 - Préserver les modifications locales de configuration, jamais écraser les tokens ; ne pas déplacer les brouillons/journal d'Activity par surprise.
@@ -76,6 +79,12 @@ Les chemins sont propres au poste. L'URL `.invalid` est un exemple fictif, pas u
 5. Les champs Azure Description/Acceptance Criteria peuvent être **HTML riches** ; convertir/échapper correctement Markdown ou texte brut si nécessaire, ne pas corrompre le contenu ni le transformer en chaîne JSON.
 6. Tester PowerShell Windows, chemins Unicode et espaces, Linux, apostrophe `l'exécution`, guillemets `« … »`, `œ`, `É`, emoji, accents combinés et saut de ligne.
 7. Les sorties structurées sont vérifiées par un parseur JSON ; `stderr` est interprété comme diagnostic, pas comme vérité métier.
+
+### Helpers disponibles au jalon 2
+
+[`shared/cli_utf8.py`](../shared/cli_utf8.py) fournit `run_cli("az", args)` ou `run_cli("gh", args)`, ainsi que `run_json(...)`, avec `subprocess.run` sans shell, délai de 30 secondes par défaut, sortie strictement UTF-8 et `PYTHONIOENCODING=utf-8` pour les outils Python. Aucun retry n'est automatique. Un échec donne une `CliError` qui ne contient ni arguments, ni sortie, ni environnement ; le code retour reste indiqué. Le texte de succès est renvoyé à l'appelant et peut contenir des données sensibles : ne pas le journaliser sans examen.
+
+Les fonctions `read_utf8`, `write_utf8`, `read_json`, `write_json`, `plain_text_to_html` et `temporary_markdown` préservent les accents, sauts de ligne et chemins Unicode. `plain_text_to_html` prend **du texte brut**, échappe les caractères HTML et transforme les sauts de ligne en `<br>` ; elle ne convertit pas du Markdown ou du HTML riche. `temporary_markdown` ferme le fichier avant l'appel CLI, notamment sous Windows, puis le supprime après usage. Les scripts des futurs skills peuvent importer le module depuis `~/.rustkins-skills/shared/` ; leurs contrôles d'authentification, de contexte Azure et de mutation restent à implémenter dans leurs jalons.
 
 ## Pratiques d'intégration
 
