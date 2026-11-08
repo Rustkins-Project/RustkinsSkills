@@ -75,10 +75,35 @@ Les chemins sont propres au poste. L'URL `.invalid` est un exemple fictif, pas u
 1. Sources `SKILL.md`, README, scripts, JSON, YAML, HTML et fichiers temporaires en UTF-8 ; convention de préférence **sans BOM**, fins de ligne compatibles.
 2. Python : `open(..., encoding="utf-8")`, `json.dumps(..., ensure_ascii=False)` lorsque lisibilité utile, `subprocess.run([...], shell=False, text=True, encoding="utf-8", errors="strict")` pour les sorties réellement UTF-8. Sur Windows, configurer/diagnostiquer le mode UTF-8 du processus (`PYTHONUTF8=1` ou `-X utf8`) en préservant les comportements des commandes qui utilisent un encodage différent.
 3. Toujours passer les arguments comme **tableau d'arguments**, jamais concaténer une chaîne PowerShell/Bash contenant des accents, apostrophes ou guillemets. Ne pas journaliser les valeurs sensibles dans un message d'erreur.
-4. Préférer les fichiers UTF-8 pour les messages longs ou multilignes : `gh pr create --body-file`, fichiers temporaires au besoin pour les appels Azure qui n'exposent pas d'option `--file`.
+4. Passer les corps de PR multiligne par un fichier UTF-8 avec `gh pr create --body-file` **et** `gh pr edit --body-file` ; suivre la vérification ci-dessous après publication. Utiliser aussi des fichiers temporaires pour les appels Azure qui n'exposent pas d'option `--file`.
 5. Les champs Azure Description/Acceptance Criteria peuvent être **HTML riches** ; convertir/échapper correctement Markdown ou texte brut si nécessaire, ne pas corrompre le contenu ni le transformer en chaîne JSON.
 6. Tester PowerShell Windows, chemins Unicode et espaces, Linux, apostrophe `l'exécution`, guillemets `« … »`, `œ`, `É`, emoji, accents combinés et saut de ligne.
 7. Les sorties structurées sont vérifiées par un parseur JSON ; `stderr` est interprété comme diagnostic, pas comme vérité métier.
+
+### Corps de PR multiligne dans PowerShell
+
+Une retouche de la PR #6 a aplati titres et listes Markdown : la sortie texte de `gh pr view --json body --jq .body` capturée dans une variable PowerShell est devenue une collection de lignes, puis sa conversion en chaîne lors de `WriteAllText` les a jointes avec des espaces. Pour **créer ou modifier** une description, conserver le Markdown dans un fichier UTF-8 et passer ce fichier directement à `gh --body-file`. Pour reprendre une description existante, lire l'objet JSON avec `gh pr view --json body | ConvertFrom-Json`, puis accéder à sa propriété `.body` ; ne pas faire l'aller-retour par la sortie texte de `--jq .body`.
+
+Exemple PowerShell pour une modification (remplacer le numéro et le contenu) :
+
+```powershell
+$body = @'
+## Résumé
+
+- Changement vérifié.
+'@
+$path = Join-Path $env:TEMP 'rustkins-pr-body.md'
+[System.IO.File]::WriteAllText($path, $body, [System.Text.UTF8Encoding]::new($false))
+gh pr edit 6 --body-file $path
+if ($LASTEXITCODE -ne 0) { throw 'Modification de la PR échouée' }
+$published = (gh pr view 6 --json body | ConvertFrom-Json).body
+$expected = $body.Replace("`r`n", "`n").TrimEnd([char]10)
+$actual = $published.Replace("`r`n", "`n").TrimEnd([char]10)
+if ($actual -cne $expected) { throw 'Le Markdown publié diffère du fichier source' }
+Remove-Item -LiteralPath $path
+```
+
+Conserver le fichier en cas d'échec pour comparer le contenu et réessayer. Cette comparaison détecte notamment la disparition des sauts de ligne ; inspecter aussi le rendu GitHub avant de déclarer la PR prête.
 
 ### Helpers disponibles au jalon 2
 
@@ -103,7 +128,7 @@ Les fonctions `read_utf8`, `write_utf8`, `read_json`, `write_json`, `plain_text_
 | Un skill avec outil manquant | Diagnostic spécifique, autres skills disponibles |
 | Échec au milieu d'une copie | Installation précédente préservée ou récupération propre |
 | `az` retourne JSON accentué | Parsing correct et accents intacts |
-| `gh pr create` avec contenu français multiligne | Corps identique au fichier UTF-8 |
+| `gh pr create` puis `gh pr edit` avec contenu français multiligne | Corps publié identique au fichier UTF-8, titres et listes conservés |
 | Azure description HTML avec `<`, `&`, `é` | Contenu non tronqué ni double-échappé |
 | Commande Azure échoue après effet distant | Relecture, pas de duplication au retry |
 | Secrets dans les variables d'environnement | Jamais affichés dans output/Activity/PR |

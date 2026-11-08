@@ -57,6 +57,8 @@ Pour ajouter un skill, créer `skills/<nom>/SKILL.md` et placer ses ressources r
 
 Le module [`shared/cli_utf8.py`](shared/cli_utf8.py) est installé une seule fois sous `~/.rustkins-skills/shared/`, utilisable par les scripts des futurs skills. Il fournit `run_cli` et `run_json` pour `az` et `gh` avec liste d'arguments, sans shell, sortie UTF-8 stricte et délai contrôlé ; `read_utf8`, `write_utf8`, `read_json` et `write_json` pour les fichiers ; `plain_text_to_html` pour un champ HTML issu de texte brut ; et `temporary_markdown` pour un fichier UTF-8 fermé avant `gh --body-file`.
 
+Pour créer **ou modifier** une description de PR sous PowerShell, suivre la [procédure de conservation du Markdown](docs/installation-and-quality.md#corps-de-pr-multiligne-dans-powershell) et comparer le corps publié au fichier source.
+
 Un script installé peut importer ce module ainsi :
 
 ```python
