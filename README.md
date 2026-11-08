@@ -1,12 +1,12 @@
 # RustkinsSkills
 
-Skills partagés par Codex et Claude Code pour les dépôts Rustkins. [`rustkins-activity`](skills/rustkins-activity/SKILL.md) gère le journal d'intervention au moyen de la CLI Rust de [RustkinsActivity](https://github.com/Rustkins-Project/RustkinsActivity). [`rustkins-boards`](skills/rustkins-boards/SKILL.md) consulte et tient à jour Azure Boards. [`rustkins-work`](skills/rustkins-work/SKILL.md) conduit les développements jusqu'à la PR. [`rustkins-ask-team`](skills/rustkins-ask-team/SKILL.md) prépare des questions à l'équipe et récupère leurs réponses validées. L'installateur découvre automatiquement les dossiers `skills/*/SKILL.md` et copie leurs ressources dans les deux clients.
+Skills partagés par Codex et Claude Code pour les dépôts Rustkins. [`rustkins-activity`](skills/rustkins-activity/SKILL.md) gère le journal d'intervention au moyen de la CLI Rust de [RustkinsActivity](https://github.com/Rustkins-Project/RustkinsActivity). [`rustkins-boards`](skills/rustkins-boards/SKILL.md) consulte et tient à jour Azure Boards. [`rustkins-work`](skills/rustkins-work/SKILL.md) conduit les développements jusqu'à la PR. [`rustkins-ask-team`](skills/rustkins-ask-team/SKILL.md) prépare des questions à l'équipe et récupère leurs réponses validées. [`rustkins-knowledge`](skills/rustkins-knowledge/SKILL.md) recherche les sources canoniques et prépare des contributions documentaires. L'installateur découvre automatiquement les dossiers `skills/*/SKILL.md` et copie leurs ressources dans les deux clients.
 
 Les deux agents reçoivent **les mêmes instructions**, le même profil humain, le même clone RustkinsActivity et le même dossier de brouillons. La recherche contextuelle et les décisions de reprise sont dans le skill ; le format, la validation, les opérations ciblées, le verrou et Git restent dans RustkinsActivity. Les règles transverses Azure sont dans RustkinsDocs.
 
 ## Roadmap des skills
 
-Les quatre premiers skills sont disponibles. Les autres sont **spécifiés mais pas encore disponibles** ; ne pas supposer qu'ils sont installés ou testés.
+Les cinq skills du premier lot sont disponibles. Les skills de sprint restent **spécifiés mais pas encore disponibles**.
 
 | Premier lot | Objectif |
 | --- | --- |
@@ -14,7 +14,7 @@ Les quatre premiers skills sont disponibles. Les autres sont **spécifiés mais 
 | `rustkins-boards` (disponible) | Azure Boards via `az` ; Tasks, US, Bugs, états, relations, DoR/DoD |
 | `rustkins-work` (disponible) | Développement autonome jusqu'à la PR ; Git/`gh`, tests, review humaine |
 | `rustkins-ask-team` (disponible) | Questions et réponses validées via l'API privée RustkinsDiscordBot |
-| `rustkins-knowledge` (à créer) | Recherche/contribution à RustkinsDocs, ADR proposées par PR |
+| `rustkins-knowledge` (disponible) | Recherche/contribution à RustkinsDocs, ADR proposées par PR |
 
 Ensuite : `rustkins-sprint-planning`, `rustkins-sprint-status` et `rustkins-sprint-close`.
 
@@ -29,6 +29,7 @@ Choix structurants : `gh` et `az` en priorité ; API directe seulement lorsque p
 - Pour `rustkins-boards` : Azure CLI avec l'extension `azure-devops`, accès au projet Azure et configuration `--azure-organization` / `--azure-project`.
 - Pour `rustkins-work` : Git et GitHub CLI authentifié ; Azure CLI et le projet configuré si le travail concerne un work item.
 - Pour `rustkins-ask-team` : URL HTTPS du bot dans `discord.base_url` et jeton client IA du développeur dans `RUSTKINS_DISCORD_AI_TOKEN` lors de l'envoi ou de la lecture.
+- Pour `rustkins-knowledge` : Git et un clone RustkinsDocs identifié ; `--docs-clone` permet de le configurer. `gh` authentifié est nécessaire pour ouvrir une PR documentaire.
 - `user.name` et `user.email` Git configurés dans ce clone. La CLI `setup` active le hook pré-commit sans écraser un hook incompatible.
 
 ## Installation Windows et Linux
@@ -84,6 +85,8 @@ Pour Azure Boards, invoquer `$rustkins-boards` dans Codex ou `/rustkins-boards` 
 Pour réaliser ou reprendre un développement, une Task, un Bug ou une review, invoquer `$rustkins-work` dans Codex ou `/rustkins-work` dans Claude Code. Le [guide PR](skills/rustkins-work/references/pr-workflow.md) précise la reprise d'une branche, les mentions Azure et la vérification du corps publié ; le [modèle de corps](skills/rustkins-work/assets/pr-body.md) sert de point de départ. Le skill coordonne Activity et Boards selon le contexte et s'arrête à une PR normale ; review et merge restent humains.
 
 Pour consulter l'équipe sur une décision manquante, invoquer `$rustkins-ask-team` dans Codex ou `/rustkins-ask-team` dans Claude Code. Le [guide des questions](skills/rustkins-ask-team/references/questions-workflow.md) décrit le fichier d'entrée, la préparation durable avant POST, la reprise après timeout et la lecture des seules réponses validées. Les tests du client simulent le bot ; aucune question réelle n'est créée pendant la recette automatisée.
+
+Pour rechercher une décision ou contribuer à RustkinsDocs, invoquer `$rustkins-knowledge` dans Codex ou `/rustkins-knowledge` dans Claude Code. Le [guide de recherche](skills/rustkins-knowledge/references/search.md) distingue les statuts et versions ; le [guide de contribution](skills/rustkins-knowledge/references/contribute.md) couvre les templates, IDs, liens et PR. Une ADR proposée nécessite la revue d'un autre humain avant fusion.
 
 ## Vérification après installation
 
