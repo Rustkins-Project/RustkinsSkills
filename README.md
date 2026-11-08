@@ -36,7 +36,7 @@ Cloner ce dépôt et RustkinsActivity. Depuis le dossier RustkinsSkills, lancer 
 python install.py --profile Timothy --author <login-GitHub> --activity-clone <chemin-RustkinsActivity> --drafts-dir <dossier-persistant-hors-clone>
 ```
 
-Remplacer `Timothy` par `Alexis` ou `Loick` selon le poste. L'installateur crée `~/.rustkins-skills/config.json`, active le hook du clone Activity et copie chaque skill disponible vers `~/.codex/skills/<nom>` et `~/.claude/skills/<nom>`. Le dossier de brouillons reste hors clone et n'est jamais effacé par l'installateur. Relancer les clients si leurs skills sont chargés au démarrage.
+Remplacer `Timothy` par `Alexis` ou `Loick` selon le poste. L'installateur crée `~/.rustkins-skills/config.json`, active le hook du clone Activity, copie chaque skill disponible vers `~/.codex/skills/<nom>` et `~/.claude/skills/<nom>`, et installe les helpers communs sous `~/.rustkins-skills/shared/`. Le dossier de brouillons reste hors clone et n'est jamais effacé par l'installateur. Relancer les clients si leurs skills sont chargés au démarrage.
 
 Les champs futurs sont facultatifs : `--docs-clone`, `--azure-organization`, `--azure-project` et `--discord-base-url`. Ils alimentent respectivement `docs_clone`, `azure.organization`, `azure.project` et `discord.base_url` dans le même JSON UTF-8. Ne pas y placer de token ou de PAT. Les clés déjà présentes sont conservées si leurs options ne sont pas fournies.
 
@@ -51,6 +51,22 @@ Un skill dont les prérequis manquent est signalé et ignoré ; les autres sont 
 Lancer `python install.py --check` (ou `python3` sous Linux) pour vérifier les outils déclarés et la configuration Activity sans installer. Cette vérification ne lance pas `setup` et ne valide pas les connexions distantes. En cas d'erreur, lire le diagnostic du skill, puis vérifier les droits d'écriture de `~/.codex/skills`, `~/.claude/skills` et `~/.rustkins-skills`. Après une interruption, relancer l'installation ; les copies précédentes sous `.rustkins-backups/` permettent une restauration manuelle.
 
 Pour ajouter un skill, créer `skills/<nom>/SKILL.md` et placer ses ressources relatives dans ce dossier. Un fichier facultatif `requirements.json` peut déclarer `{"commands": ["git", "gh"]}` ou `{"commands": ["az"], "azure_devops_extension": true}`. L'installateur copie le dossier entier sans modification de son code. L'authentification et les permissions restent à contrôler lors de l'utilisation du skill.
+
+## Socle CLI et UTF-8
+
+Le module [`shared/cli_utf8.py`](shared/cli_utf8.py) est installé une seule fois sous `~/.rustkins-skills/shared/`, utilisable par les scripts des futurs skills. Il fournit `run_cli` et `run_json` pour `az` et `gh` avec liste d'arguments, sans shell, sortie UTF-8 stricte et délai contrôlé ; `read_utf8`, `write_utf8`, `read_json` et `write_json` pour les fichiers ; `plain_text_to_html` pour un champ HTML issu de texte brut ; et `temporary_markdown` pour un fichier UTF-8 fermé avant `gh --body-file`.
+
+Un script installé peut importer ce module ainsi :
+
+```python
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path.home() / ".rustkins-skills" / "shared"))
+from cli_utf8 import run_cli, run_json, temporary_markdown
+```
+
+Les exceptions `CliError` indiquent l'outil et la catégorie d'échec sans reproduire les arguments, la sortie ou l'environnement, qui peuvent contenir des secrets. Après un échec ou un timeout d'une commande de mutation, relire l'état distant avant toute nouvelle tentative. Le module ne gère ni l'authentification, ni les décisions métier, ni les retries.
 
 ## Utilisation
 

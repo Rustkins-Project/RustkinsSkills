@@ -13,6 +13,7 @@ from pathlib import Path
 
 
 SKILLS_DIR = Path(__file__).resolve().parent / "skills"
+SHARED_DIR = Path(__file__).resolve().parent / "shared"
 PROFILES = ("Timothy", "Alexis", "Loick")
 CLIENTS = (".codex", ".claude")
 ACTIVITY_KEYS = ("profile", "author", "activity_clone", "drafts_dir")
@@ -63,10 +64,20 @@ def missing_requirements(skill):
 def same_tree(source, target):
     if not target.is_dir():
         return False
-    source_files = {p.relative_to(source) for p in source.rglob("*") if p.is_file()}
-    target_files = {p.relative_to(target) for p in target.rglob("*") if p.is_file()}
-    source_dirs = {p.relative_to(source) for p in source.rglob("*") if p.is_dir()}
-    target_dirs = {p.relative_to(target) for p in target.rglob("*") if p.is_dir()}
+
+    def retained_paths(root, is_dir):
+        return {
+            path.relative_to(root)
+            for path in root.rglob("*")
+            if (path.is_dir() if is_dir else path.is_file())
+            and "__pycache__" not in path.relative_to(root).parts
+            and path.suffix not in (".pyc", ".pyo")
+        }
+
+    source_files = retained_paths(source, is_dir=False)
+    target_files = retained_paths(target, is_dir=False)
+    source_dirs = retained_paths(source, is_dir=True)
+    target_dirs = retained_paths(target, is_dir=True)
     return source_files == target_files and source_dirs == target_dirs and all(
         (source / relative).read_bytes() == (target / relative).read_bytes()
         for relative in source_files
@@ -188,8 +199,21 @@ def install(args):
                     continue
                 staging = Path(stack.enter_context(tempfile.TemporaryDirectory(dir=destination)))
                 staged = staging / skill.name
-                shutil.copytree(skill, staged)
+                shutil.copytree(skill, staged, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"))
                 replacements.append((client, skill.name, target, staged))
+
+        if SHARED_DIR.is_dir():
+            shared_target = config_file.parent / "shared"
+            if shared_target.exists() and not shared_target.is_dir():
+                raise ValueError(f"Destination occupée par un fichier : {shared_target}")
+            if not same_tree(SHARED_DIR, shared_target):
+                config_file.parent.mkdir(parents=True, exist_ok=True)
+                staging = Path(stack.enter_context(tempfile.TemporaryDirectory(dir=config_file.parent)))
+                staged = staging / "shared"
+                shutil.copytree(
+                    SHARED_DIR, staged, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo")
+                )
+                replacements.append(("common", "shared", shared_target, staged))
 
         if activity_clone is not None:
             activity_configuration(values, create_drafts=True)
@@ -219,8 +243,9 @@ def install(args):
             raise
         finally:
             staged_config.unlink(missing_ok=True)
-        for _, _, target, _ in replacements:
-            print(f"Skill installé : {target}")
+        for client, _, target, _ in replacements:
+            label = "Ressources communes" if client == "common" else "Skill installé"
+            print(f"{label} : {target}")
         for backup_root in sorted(backup_roots):
             print(f"Copies précédentes conservées : {backup_root}")
         print(f"Configuration commune : {config_file}")

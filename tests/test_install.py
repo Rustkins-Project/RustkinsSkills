@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import tempfile
 import unittest
@@ -33,14 +34,18 @@ class InstallTests(unittest.TestCase):
         self.home = self.root / "home"
         self.skills = self.root / "skills"
         self.skills.mkdir()
+        self.shared = self.root / "shared"
         self.home_patch = patch.object(Path, "home", return_value=self.home)
         self.skills_patch = patch.object(install, "SKILLS_DIR", self.skills)
+        self.shared_patch = patch.object(install, "SHARED_DIR", self.shared)
         self.which_patch = patch.object(install.shutil, "which", return_value="tool")
         self.home_patch.start()
         self.skills_patch.start()
+        self.shared_patch.start()
         self.which_patch.start()
         self.addCleanup(self.home_patch.stop)
         self.addCleanup(self.skills_patch.stop)
+        self.addCleanup(self.shared_patch.stop)
         self.addCleanup(self.which_patch.stop)
 
     def config(self):
@@ -178,6 +183,49 @@ class InstallTests(unittest.TestCase):
             self.assertTrue((self.target(client, "first") / "SKILL.md").exists())
         self.assertFalse((self.home / ".codex" / "skills" / ".rustkins-backups").exists())
 
+    def test_shared_helpers_are_installed_and_updated_with_backup(self):
+        make_skill(self.skills, "free")
+        self.shared.mkdir()
+        (self.shared / "cli_utf8.py").write_text("ancien\n", encoding="utf-8")
+        install.install(args())
+        installed = self.home / ".rustkins-skills" / "shared" / "cli_utf8.py"
+        self.assertEqual(installed.read_text(encoding="utf-8"), "ancien\n")
+        install.install(args())
+        self.assertFalse((self.home / ".rustkins-skills" / ".rustkins-backups").exists())
+        (self.shared / "cli_utf8.py").write_text("nouveau\n", encoding="utf-8")
+        install.install(args())
+        self.assertEqual(installed.read_text(encoding="utf-8"), "nouveau\n")
+        backups = list((self.home / ".rustkins-skills" / ".rustkins-backups").glob(
+            "*/shared/cli_utf8.py"
+        ))
+        self.assertEqual(len(backups), 1)
+        self.assertEqual(backups[0].read_text(encoding="utf-8"), "ancien\n")
+
+    def test_python_caches_are_not_installed_or_treated_as_source_changes(self):
+        make_skill(self.skills, "free")
+        self.shared.mkdir()
+        (self.shared / "cli_utf8.py").write_text("code\n", encoding="utf-8")
+        (self.shared / "__pycache__").mkdir()
+        (self.shared / "__pycache__" / "cli_utf8.pyc").write_bytes(b"cache")
+        install.install(args())
+        target = self.home / ".rustkins-skills" / "shared"
+        self.assertFalse((target / "__pycache__").exists())
+        (target / "__pycache__").mkdir()
+        (target / "__pycache__" / "cli_utf8.pyc").write_bytes(b"runtime-cache")
+        install.install(args())
+        self.assertFalse((self.home / ".rustkins-skills" / ".rustkins-backups").exists())
+
+    def test_installed_shared_module_can_be_imported(self):
+        make_skill(self.skills, "free")
+        source = Path(install.__file__).resolve().parent / "shared"
+        with patch.object(install, "SHARED_DIR", source):
+            install.install(args())
+        path = self.home / ".rustkins-skills" / "shared" / "cli_utf8.py"
+        spec = importlib.util.spec_from_file_location("installed_cli_utf8", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.assertEqual(module.plain_text_to_html("É & œ"), "É &amp; œ")
+
     def test_backup_rename_stays_on_destination_filesystem(self):
         make_skill(self.skills, "one", "updated\n")
         targets = []
@@ -255,6 +303,36 @@ class InstallTests(unittest.TestCase):
                 install.install(args(author="new"))
         for client in install.CLIENTS:
             self.assertEqual((self.target(client, "one") / "SKILL.md").read_text(encoding="utf-8"), "previous\n")
+        self.assertEqual(config_file.read_text(encoding="utf-8"), '{"author": "previous"}\n')
+
+    def test_config_write_failure_restores_skills_and_shared_helpers(self):
+        make_skill(self.skills, "one", "updated\n")
+        self.shared.mkdir()
+        (self.shared / "cli_utf8.py").write_text("updated\n", encoding="utf-8")
+        targets = [self.target(client, "one") for client in install.CLIENTS]
+        targets.append(self.home / ".rustkins-skills" / "shared")
+        for target in targets:
+            target.mkdir(parents=True)
+            filename = "cli_utf8.py" if target.name == "shared" else "SKILL.md"
+            (target / filename).write_text("previous\n", encoding="utf-8")
+        config_file = self.home / ".rustkins-skills" / "config.json"
+        config_file.write_text('{"author": "previous"}\n', encoding="utf-8")
+        original_replace = Path.replace
+        failed = False
+
+        def fail_config_write(path, destination):
+            nonlocal failed
+            if not failed and destination == config_file:
+                failed = True
+                raise OSError("config failed")
+            return original_replace(path, destination)
+
+        with patch.object(Path, "replace", fail_config_write):
+            with self.assertRaisesRegex(OSError, "config failed"):
+                install.install(args(author="new"))
+        for target in targets:
+            filename = "cli_utf8.py" if target.name == "shared" else "SKILL.md"
+            self.assertEqual((target / filename).read_text(encoding="utf-8"), "previous\n")
         self.assertEqual(config_file.read_text(encoding="utf-8"), '{"author": "previous"}\n')
 
     def test_rejects_drafts_inside_clone_without_writing(self):
