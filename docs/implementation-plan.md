@@ -1,6 +1,6 @@
 # Plan d'implémentation de RustkinsSkills
 
-> **Plan de cadrage** : les jalons 1 et 2 fournissent l'installateur et les helpers locaux ; les jalons 3 à 5 fournissent `rustkins-boards`, `rustkins-work` et `rustkins-ask-team`. La connaissance et l'automatisation de sprint restent prévues pour les jalons suivants.
+> **Plan de cadrage** : les jalons 1 et 2 fournissent l'installateur et les helpers locaux ; les jalons 3 à 6 fournissent les quatre nouveaux skills du premier lot. Le parcours intégré et l'automatisation de sprint restent prévus pour les jalons suivants.
 > **Principe de livraison :** jalons fonctionnels indépendants, PR de code courtes et revues humaines ; pas de versionnement par skill.
 
 ## Hypothèses et prérequis

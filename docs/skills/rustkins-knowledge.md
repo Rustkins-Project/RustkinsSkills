@@ -1,6 +1,6 @@
 # Spécification — rustkins-knowledge
 
-> **Statut :** à implémenter. Source canonique : [conventions RustkinsDocs](https://github.com/Rustkins-Project/RustkinsDocs/blob/main/docs/conventions/knowledge-management.md).
+> **Statut :** implémenté au jalon 6 dans [`skills/rustkins-knowledge/`](../../skills/rustkins-knowledge/SKILL.md). La recette d'une vraie contribution ADR/PR reste à conduire lors d'une demande documentaire. Source canonique : [conventions RustkinsDocs](https://github.com/Rustkins-Project/RustkinsDocs/blob/main/docs/conventions/knowledge-management.md).
 
 ## Objectifs
 
