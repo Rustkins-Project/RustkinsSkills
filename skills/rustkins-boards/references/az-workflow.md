@@ -37,7 +37,7 @@ python -X utf8 "$HOME/.codex/skills/rustkins-boards/scripts/boards_ops.py" claim
 python -X utf8 "$HOME/.codex/skills/rustkins-boards/scripts/boards_ops.py" set-progress --id 151 --expected New --to Active --reason "Développement démarré"
 ```
 
-Le script appelle le CLI Azure sans shell, écrit le texte brut sous forme HTML échappé et vérifie les objets distants. Il refuse les doublons ambigus, les réaffectations et les changements d'état concurrents. Il utilise une opération REST JSON Patch via `az devops invoke` avec `test /rev` avant les champs modifiés. Une perte de réponse après effet distant exige une relecture ; l'absence de confirmation n'autorise pas une nouvelle création. Il n'y a pas de verrou d'unicité côté Azure : deux créations réellement simultanées restent possibles et doivent être rapprochées manuellement.
+Le script appelle le CLI Azure sans shell, écrit le texte brut sous forme HTML échappé et vérifie les objets distants. Il refuse les doublons ambigus, les réaffectations et les changements d'état concurrents. Il utilise une opération REST JSON Patch via `az rest` avec `test /rev` avant les champs modifiés ; une session `az login` est nécessaire pour le jeton Microsoft Entra Azure DevOps. L'extension `az devops invoke` 1.0.10 résout `workItems` vers la route de création (`${type}`) sur le projet Test : elle ne convient donc pas à ce PATCH par ID. Une perte de réponse après effet distant exige une relecture ; l'absence de confirmation n'autorise pas une nouvelle création. Il n'y a pas de verrou d'unicité côté Azure : deux créations réellement simultanées restent possibles et doivent être rapprochées manuellement.
 
 Pour les autres mutations (relations de dépendance, Bug/Issue, Task sans PR, US `Resolved`), lis l'état juste avant, respecte la gouvernance du [skill](../SKILL.md), applique une opération explicite avec garde de révision si disponible, relis ensuite. `az boards work-item update` n'offre pas de garde de révision ; ne l'utilise pas pour écraser une attribution ou un état observé précédemment. N'écris jamais seulement `System.BoardColumn`. Ne ferme jamais une US sans décision humaine de Sprint Review.
 
@@ -46,6 +46,6 @@ Pour les autres mutations (relations de dépendance, Bug/Issue, Task sans PR, US
 - [Azure CLI : work-item](https://learn.microsoft.com/en-us/cli/azure/boards/work-item?view=azure-cli-latest)
 - [Azure CLI : query](https://learn.microsoft.com/en-us/cli/azure/boards?view=azure-cli-latest)
 - [Azure CLI : relations](https://learn.microsoft.com/en-us/cli/azure/boards/work-item/relation?view=azure-cli-latest)
-- [Azure CLI : invoke](https://learn.microsoft.com/en-us/cli/azure/devops?view=azure-cli-latest)
+- [Azure CLI : rest](https://learn.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest#az-rest)
 - [REST Work Items Update et JSON Patch](https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/work-items/update?view=azure-devops-rest-7.1)
 - [Gouvernance RustkinsDocs](https://github.com/Rustkins-Project/RustkinsDocs/tree/main/docs/project-management)

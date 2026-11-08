@@ -8,7 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 sys.path.insert(0, str(Path.home() / ".rustkins-skills" / "shared"))
 from cli_utf8 import CliError, plain_text_to_html, read_json, run_json, write_json
@@ -202,13 +202,15 @@ def revision_patch(work_item: Dict[str, Any], field: str, value: str, config: Di
     with tempfile.TemporaryDirectory() as directory:
         body = Path(directory) / "patch.json"
         write_json(body, operations)
+        url = (
+            f"{config['organization']}/{quote(config['project'], safe='')}"
+            f"/_apis/wit/workitems/{work_item['id']}?api-version=7.1"
+        )
         run_json("az", [
-            "devops", "invoke", "--area", "wit", "--resource", "workitems",
-            "--route-parameters", f"project={config['project']}", f"id={work_item['id']}",
-            "--http-method", "PATCH", "--api-version", "7.1",
-            "--media-type", "application/json-patch+json",
-            "--in-file", str(body), "--encoding", "utf-8",
-            "--org", config["organization"], "-o", "json",
+            "rest", "--method", "patch", "--url", url,
+            "--resource", "https://app.vssps.visualstudio.com/",
+            "--headers", "Content-Type=application/json-patch+json",
+            "--body", f"@{body}", "-o", "json",
         ])
 
 

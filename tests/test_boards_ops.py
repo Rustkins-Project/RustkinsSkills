@@ -168,9 +168,13 @@ class BoardsTests(unittest.TestCase):
         current = work_item(151, "Task", rev=7)
         captured = []
         def fake_run(tool, args):
-            body = Path(args[args.index("--in-file") + 1])
+            body = Path(args[args.index("--body") + 1][1:])
             captured.extend(json.loads(body.read_text(encoding="utf-8")))
-            self.assertIn("application/json-patch+json", args)
+            self.assertEqual(args[:3], ["rest", "--method", "patch"])
+            self.assertEqual(args[args.index("--url") + 1],
+                             "https://dev.azure.com/rustkins/Rustkins/_apis/wit/workitems/151?api-version=7.1")
+            self.assertIn("https://app.vssps.visualstudio.com/", args)
+            self.assertIn("Content-Type=application/json-patch+json", args)
             return {"id": 151}
         with patch.object(boards, "run_json", side_effect=fake_run):
             boards.revision_patch(current, "System.State", "Blocked", CONFIG, "Échec d'exécution")

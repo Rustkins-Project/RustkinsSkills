@@ -50,7 +50,7 @@ def missing_requirements(skill):
     if extension and "az" not in missing:
         try:
             result = subprocess.run(
-                ["az", "extension", "list", "--query", "[].name", "-o", "tsv"],
+                [shutil.which("az") or "az", "extension", "list", "--query", "[].name", "-o", "tsv"],
                 capture_output=True, text=True, encoding="utf-8", errors="replace",
                 check=False,
             )
