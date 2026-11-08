@@ -2,6 +2,7 @@
 """Conservative Azure Boards operations for Rustkins Tasks and progress states."""
 
 import argparse
+from datetime import date
 import json
 import re
 import sys
@@ -274,6 +275,88 @@ def set_progress(task_id: int, expected: str, target: str, reason: str, config: 
     return task_id
 
 
+def set_iteration(story_id: int, expected: str, target: str, reason: str,
+                  config: Dict[str, str]) -> int:
+    """Move one approved User Story to a previously checked sprint path."""
+    prefix = config["project"] + "\\"
+    if story_id <= 0 or not expected or not target.startswith(prefix) or not target[len(prefix):] or not reason.strip():
+        raise BoardError("Iteration ou motif invalide ; choisir un sprint existant du projet")
+    current = item(story_id, config)
+    fields = current["fields"]
+    if (fields.get("System.WorkItemType") != "User Story"
+            or fields.get("System.State") not in ("New", "Active", "Blocked", "On Hold")
+            or fields.get("System.IterationPath") != expected):
+        raise BoardError(f"US AB#{story_id} ou iteration modifiee ; relire avant de reessayer")
+    if expected == target:
+        return story_id
+    try:
+        revision_patch(current, "System.IterationPath", target, config, reason)
+    except CliError:
+        raise BoardError(f"Iteration de AB#{story_id} incertaine ; relire avant de reessayer") from None
+    if item(story_id, config)["fields"].get("System.IterationPath") != target:
+        raise BoardError(f"Iteration de AB#{story_id} non confirmee")
+    return story_id
+
+
+def review_story(payload: Dict[str, Any], config: Dict[str, str]) -> int:
+    """Apply an explicit human Sprint Review decision to one resolved story."""
+    if not isinstance(payload, dict):
+        raise BoardError("Decision de review invalide : objet JSON attendu")
+    story_id = payload.get("story_id")
+    decision = payload.get("decision")
+    sprint = payload.get("sprint")
+    review_date = payload.get("review_date")
+    participants = payload.get("participants")
+    review_url = payload.get("review_url")
+    reason = payload.get("reason")
+    parsed = urlparse(review_url) if isinstance(review_url, str) else None
+    if (
+        type(story_id) is not int or story_id <= 0 or decision not in ("accepted", "rejected")
+        or not isinstance(sprint, str) or not sprint.startswith(config["project"] + "\\")
+        or not isinstance(review_date, str) or not isinstance(participants, list) or not participants
+        or any(not isinstance(person, str) or not person.strip() for person in participants)
+        or parsed is None or parsed.scheme != "https" or parsed.hostname != "github.com"
+        or not parsed.path.lower().startswith("/rustkins-project/rustkinsdocs/")
+        or parsed.username or parsed.password
+        or not isinstance(reason, str) or not reason.strip()
+    ):
+        raise BoardError("Decision de review incomplete : US, sprint, date, participants, URL et motif requis")
+    try:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", review_date):
+            raise ValueError("format")
+        date.fromisoformat(review_date)
+    except ValueError:
+        raise BoardError("Date de review invalide (YYYY-MM-DD)") from None
+    current = item(story_id, config)
+    fields = current["fields"]
+    if fields.get("System.WorkItemType") != "User Story" or fields.get("System.State") != "Resolved":
+        raise BoardError(f"AB#{story_id} doit etre une User Story Resolved ; relire avant de reessayer")
+    if fields.get("System.IterationPath") != sprint or not fields.get("Microsoft.VSTS.Common.AcceptanceCriteria"):
+        raise BoardError(f"Sprint ou criteres d'acceptation de AB#{story_id} non verifies")
+    if decision == "accepted":
+        for relation in current.get("relations") or []:
+            if relation.get("rel") != "System.LinkTypes.Hierarchy-Forward":
+                continue
+            match = re.search(r"/workitems/(\d+)$", relation.get("url", ""), re.IGNORECASE)
+            if not match:
+                raise BoardError(f"Enfant de AB#{story_id} illisible")
+            child = item(int(match.group(1)), config)
+            if child["fields"].get("System.WorkItemType") == "Task" and child["fields"].get("System.State") != "Closed":
+                raise BoardError(f"Task AB#{child['id']} non Closed ; review incomplete")
+    target = "Closed" if decision == "accepted" else "Active"
+    history = (
+        f"Sprint Review {review_date} ({sprint}) : {decision} par {', '.join(participants)}. "
+        f"Compte rendu : {review_url}. Motif : {reason.strip()}"
+    )
+    try:
+        revision_patch(current, "System.State", target, config, history)
+    except CliError:
+        raise BoardError(f"Decision de review sur AB#{story_id} incertaine ; relire avant de reessayer") from None
+    if item(story_id, config)["fields"].get("System.State") != target:
+        raise BoardError(f"Decision de review sur AB#{story_id} non confirmee")
+    return story_id
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -287,6 +370,13 @@ def main() -> int:
     progress.add_argument("--expected", required=True)
     progress.add_argument("--to", required=True)
     progress.add_argument("--reason", required=True)
+    iteration = commands.add_parser("set-iteration")
+    iteration.add_argument("--id", type=int, required=True)
+    iteration.add_argument("--expected", required=True)
+    iteration.add_argument("--to", required=True)
+    iteration.add_argument("--reason", required=True)
+    review = commands.add_parser("review-story")
+    review.add_argument("--input", type=Path, required=True, help="Decision humaine de Sprint Review en JSON UTF-8")
     args = parser.parse_args()
     try:
         config = configuration()
@@ -294,8 +384,12 @@ def main() -> int:
             task_id = create_task(read_json(args.input), config)
         elif args.command == "claim-task":
             task_id = claim_task(args.id, args.identity, config)
-        else:
+        elif args.command == "set-progress":
             task_id = set_progress(args.id, args.expected, args.to, args.reason, config)
+        elif args.command == "set-iteration":
+            task_id = set_iteration(args.id, args.expected, args.to, args.reason, config)
+        else:
+            task_id = review_story(read_json(args.input), config)
     except (BoardError, CliError, OSError, ValueError, json.JSONDecodeError) as error:
         print(f"Opération Boards interrompue : {error}", file=sys.stderr)
         return 1

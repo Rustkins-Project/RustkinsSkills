@@ -1,0 +1,4 @@
+{
+  "commands": ["az", "gh"],
+  "azure_devops_extension": true
+}

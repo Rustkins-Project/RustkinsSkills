@@ -6,7 +6,7 @@ Les deux agents reçoivent **les mêmes instructions**, le même profil humain, 
 
 ## Roadmap des skills
 
-Les cinq skills du premier lot sont disponibles. Les skills de sprint restent **spécifiés mais pas encore disponibles**.
+Les cinq skills du premier lot et les trois skills de sprint sont disponibles.
 
 | Premier lot | Objectif |
 | --- | --- |
@@ -16,7 +16,11 @@ Les cinq skills du premier lot sont disponibles. Les skills de sprint restent **
 | `rustkins-ask-team` (disponible) | Questions et réponses validées via l'API privée RustkinsDiscordBot |
 | `rustkins-knowledge` (disponible) | Recherche/contribution à RustkinsDocs, ADR proposées par PR |
 
-Ensuite : `rustkins-sprint-planning`, `rustkins-sprint-status` et `rustkins-sprint-close`.
+| Sprint | Objectif |
+| --- | --- |
+| [`rustkins-sprint-planning`](skills/rustkins-sprint-planning/SKILL.md) | Proposer Goal, US et Tasks ; appliquer uniquement la sélection validée |
+| [`rustkins-sprint-status`](skills/rustkins-sprint-status/SKILL.md) | Consolider états Azure, PR/CI, dépendances et SP livrés |
+| [`rustkins-sprint-close`](skills/rustkins-sprint-close/SKILL.md) | Préparer review/rétro, appliquer les décisions humaines et gérer les reports |
 
 **Dossiers de conception :** [architecture](docs/architecture.md), [plan d'implémentation](docs/implementation-plan.md), [installation et qualité UTF-8](docs/installation-and-quality.md) et [contrats de chaque skill](docs/skills/). Les comportements sont soumis à la gouvernance de RustkinsDocs, notamment les critères de Sprint Review.
 
@@ -30,6 +34,7 @@ Choix structurants : `gh` et `az` en priorité ; API directe seulement lorsque p
 - Pour `rustkins-work` : Git et GitHub CLI authentifié ; Azure CLI et le projet configuré si le travail concerne un work item.
 - Pour `rustkins-ask-team` : URL HTTPS du bot dans `discord.base_url` (HTTP limité à `127.0.0.1` ou `::1` pour la recette locale) et jeton client IA du développeur dans `RUSTKINS_DISCORD_AI_TOKEN` lors de l'envoi ou de la lecture.
 - Pour `rustkins-knowledge` : Git et un clone RustkinsDocs identifié ; `--docs-clone` permet de le configurer. `gh` authentifié est nécessaire pour ouvrir une PR documentaire.
+- Pour les skills de sprint : Azure CLI et extension `azure-devops` ; `git` pour le planning et la clôture documentaire, `gh` pour le suivi des PR/CI et la clôture.
 - `user.name` et `user.email` Git configurés dans ce clone. La CLI `setup` active le hook pré-commit sans écraser un hook incompatible.
 
 ## Installation Windows et Linux
@@ -58,7 +63,7 @@ Pour ajouter un skill, créer `skills/<nom>/SKILL.md` et placer ses ressources r
 
 ## Socle CLI et UTF-8
 
-Le module [`shared/cli_utf8.py`](shared/cli_utf8.py) est installé une seule fois sous `~/.rustkins-skills/shared/`, utilisable par les scripts des futurs skills. Il fournit `run_cli` et `run_json` pour `az` et `gh` avec liste d'arguments, sans shell, sortie UTF-8 stricte et délai contrôlé ; `read_utf8`, `write_utf8`, `read_json` et `write_json` pour les fichiers ; `plain_text_to_html` pour un champ HTML issu de texte brut ; et `temporary_markdown` pour un fichier UTF-8 fermé avant `gh --body-file`.
+Le module [`shared/cli_utf8.py`](shared/cli_utf8.py) est installé une seule fois sous `~/.rustkins-skills/shared/`, utilisable par les scripts des skills. Il fournit `run_cli` et `run_json` pour `az` et `gh` avec liste d'arguments, sans shell, sortie UTF-8 stricte et délai contrôlé ; `read_utf8`, `write_utf8`, `read_json` et `write_json` pour les fichiers ; `plain_text_to_html` pour un champ HTML issu de texte brut ; et `temporary_markdown` pour un fichier UTF-8 fermé avant `gh --body-file`.
 
 Pour créer **ou modifier** une description de PR sous PowerShell, suivre la [procédure de conservation du Markdown](docs/installation-and-quality.md#corps-de-pr-multiligne-dans-powershell) et comparer le corps publié au fichier source.
 

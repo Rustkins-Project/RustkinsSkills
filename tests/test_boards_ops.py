@@ -184,6 +184,86 @@ class BoardsTests(unittest.TestCase):
             with self.assertRaises(boards.BoardError):
                 boards.set_progress(151, "New", "Blocked", "Dépendance", CONFIG)
 
+    def test_iteration_move_checks_story_and_previous_path(self):
+        story = work_item(142, "User Story")
+        moved = work_item(142, "User Story", rev=4)
+        moved["fields"]["System.IterationPath"] = "Rustkins\\Sprint 2"
+        with patch.object(boards, "item", side_effect=[story, moved]), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            self.assertEqual(142, boards.set_iteration(
+                142, "Rustkins\\Sprint 1", "Rustkins\\Sprint 2", "Planning validé", CONFIG
+            ))
+            mutate.assert_called_once_with(
+                story, "System.IterationPath", "Rustkins\\Sprint 2", CONFIG, "Planning validé"
+            )
+        with patch.object(boards, "item", return_value=story), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            with self.assertRaises(boards.BoardError):
+                boards.set_iteration(142, "Rustkins\\Autre", "Rustkins\\Sprint 2", "Décision", CONFIG)
+            with self.assertRaises(boards.BoardError):
+                boards.set_iteration(142, "Rustkins\\Sprint 1", "Autre\\Sprint 2", "Décision", CONFIG)
+            mutate.assert_not_called()
+        resolved = work_item(142, "User Story", state="Resolved")
+        with patch.object(boards, "item", return_value=resolved), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            with self.assertRaises(boards.BoardError):
+                boards.set_iteration(142, "Rustkins\\Sprint 1", "Rustkins\\Sprint 2", "Report", CONFIG)
+            mutate.assert_not_called()
+
+    def test_review_acceptance_requires_resolved_story_and_closed_tasks(self):
+        decision = {
+            "story_id": 142, "decision": "accepted", "sprint": "Rustkins\\Sprint 1",
+            "review_date": "2026-11-08", "participants": ["Timothy", "Alexis"],
+            "review_url": "https://github.com/Rustkins-Project/RustkinsDocs/pull/7",
+            "reason": "AC démontrés sur la plateforme de test",
+        }
+        story = work_item(142, "User Story", state="Resolved")
+        story["relations"] = [{
+            "rel": "System.LinkTypes.Hierarchy-Forward",
+            "url": "https://dev.azure.com/rustkins/_apis/wit/workItems/151",
+        }]
+        task = work_item(151, "Task", parent=142, state="Closed")
+        closed = work_item(142, "User Story", state="Closed", rev=4)
+        with patch.object(boards, "item", side_effect=[story, task, closed]), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            self.assertEqual(142, boards.review_story(decision, CONFIG))
+            self.assertEqual(mutate.call_args.args[:4], (story, "System.State", "Closed", CONFIG))
+            self.assertIn("Sprint Review 2026-11-08", mutate.call_args.args[4])
+            self.assertIn(decision["review_url"], mutate.call_args.args[4])
+        task["fields"]["System.State"] = "Active"
+        with patch.object(boards, "item", side_effect=[story, task]), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            with self.assertRaisesRegex(boards.BoardError, "non Closed"):
+                boards.review_story(decision, CONFIG)
+            mutate.assert_not_called()
+
+    def test_review_rejection_returns_story_to_active_and_validates_decision(self):
+        decision = {
+            "story_id": 142, "decision": "rejected", "sprint": "Rustkins\\Sprint 1",
+            "review_date": "2026-11-08", "participants": ["Loick"],
+            "review_url": "https://github.com/Rustkins-Project/RustkinsDocs/pull/7",
+            "reason": "AC initial non satisfait",
+        }
+        resolved = work_item(142, "User Story", state="Resolved")
+        active = work_item(142, "User Story", state="Active", rev=4)
+        with patch.object(boards, "item", side_effect=[resolved, active]), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            self.assertEqual(142, boards.review_story(decision, CONFIG))
+            self.assertEqual(mutate.call_args.args[2], "Active")
+        for bad in ({**decision, "review_date": "20261108"}, {**decision, "participants": []},
+                    {**decision, "review_url": "http://example.org"},
+                    {**decision, "review_url": "https://github.com/other/repo/pull/7"}):
+            with patch.object(boards, "item") as read:
+                with self.assertRaises(boards.BoardError):
+                    boards.review_story(bad, CONFIG)
+                read.assert_not_called()
+
     def test_patch_body_checks_revision(self):
         current = work_item(151, "Task", rev=7)
         captured = []
