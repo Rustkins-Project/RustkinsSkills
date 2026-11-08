@@ -153,6 +153,28 @@ class QuestionTests(unittest.TestCase):
         with self.assertRaisesRegex(questions.QuestionError, "HTTPS"):
             questions.submit(self.home, self.input, opener=Api())
 
+    def test_local_http_base_is_allowed_only_on_literal_loopback(self):
+        config = self.home / ".rustkins-skills" / "config.json"
+        for base in ("http://127.0.0.1:8080/", "http://[::1]:8080/"):
+            with self.subTest(base=base):
+                config.write_text(json.dumps({"profile": "Timothy", "discord": {"base_url": base}}), encoding="utf-8")
+                self.assertEqual(questions.settings(self.home), (base.rstrip("/"), "secret-token"))
+        for base in ("http://localhost:8080", "http://127.0.0.1.evil.test:8080", "http://192.168.1.10:8080"):
+            with self.subTest(base=base):
+                config.write_text(json.dumps({"profile": "Timothy", "discord": {"base_url": base}}), encoding="utf-8")
+                with self.assertRaisesRegex(questions.QuestionError, "HTTPS"):
+                    questions.settings(self.home)
+
+    def test_local_http_disables_environment_proxy(self):
+        config = self.home / ".rustkins-skills" / "config.json"
+        config.write_text(json.dumps({"profile": "Timothy", "discord": {"base_url": "http://127.0.0.1:8080"}}), encoding="utf-8")
+        question_id = str(uuid.uuid4())
+        api = Api(Reply(200, self.response(question_id)))
+        with patch.object(questions.urllib.request, "build_opener") as build:
+            build.return_value.open = api
+            questions.get_question(self.home, question_id)
+        self.assertTrue(any(isinstance(handler, questions.urllib.request.ProxyHandler) and handler.proxies == {} for handler in build.call_args.args))
+
     def test_answered_status_requires_validated_answer_object(self):
         question_id = str(uuid.uuid4())
         api = Api(Reply(200, self.response(question_id, "answered")))

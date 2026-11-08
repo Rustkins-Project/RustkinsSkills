@@ -28,7 +28,7 @@ Choix structurants : `gh` et `az` en priorité ; API directe seulement lorsque p
 - Pour `rustkins-activity` : Git, Rust/Cargo et un clone RustkinsActivity à jour, sur `main`, avec les commandes `discover`, `prepare-create` et `prepare-patch`.
 - Pour `rustkins-boards` : Azure CLI avec l'extension `azure-devops`, accès au projet Azure et configuration `--azure-organization` / `--azure-project`.
 - Pour `rustkins-work` : Git et GitHub CLI authentifié ; Azure CLI et le projet configuré si le travail concerne un work item.
-- Pour `rustkins-ask-team` : URL HTTPS du bot dans `discord.base_url` et jeton client IA du développeur dans `RUSTKINS_DISCORD_AI_TOKEN` lors de l'envoi ou de la lecture.
+- Pour `rustkins-ask-team` : URL HTTPS du bot dans `discord.base_url` (HTTP limité à `127.0.0.1` ou `::1` pour la recette locale) et jeton client IA du développeur dans `RUSTKINS_DISCORD_AI_TOKEN` lors de l'envoi ou de la lecture.
 - Pour `rustkins-knowledge` : Git et un clone RustkinsDocs identifié ; `--docs-clone` permet de le configurer. `gh` authentifié est nécessaire pour ouvrir une PR documentaire.
 - `user.name` et `user.email` Git configurés dans ce clone. La CLI `setup` active le hook pré-commit sans écraser un hook incompatible.
 

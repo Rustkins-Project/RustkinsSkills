@@ -65,6 +65,23 @@ def valid_https_url(value):
         return False
 
 
+def valid_base_url(value):
+    if valid_https_url(value):
+        return True
+    try:
+        if any(ord(character) < 33 for character in value):
+            return False
+        parsed = urllib.parse.urlsplit(value)
+        return (
+            parsed.scheme == "http"
+            and parsed.hostname in ("127.0.0.1", "::1")
+            and not parsed.username
+            and not parsed.password
+        )
+    except ValueError:
+        return False
+
+
 def fingerprint(content):
     canonical = json.dumps(content, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -135,8 +152,8 @@ def settings(home):
     config = read_json(home / ".rustkins-skills" / "config.json")
     discord = config.get("discord") if isinstance(config, dict) else None
     base = discord.get("base_url") if isinstance(discord, dict) else None
-    if not isinstance(base, str) or not valid_https_url(base):
-        raise QuestionError("Configurer discord.base_url avec une URL HTTPS dans ~/.rustkins-skills/config.json")
+    if not isinstance(base, str) or not valid_base_url(base):
+        raise QuestionError("Configurer discord.base_url en HTTPS, ou en HTTP sur 127.0.0.1/::1 uniquement")
     parsed = urllib.parse.urlsplit(base)
     if parsed.query or parsed.fragment:
         raise QuestionError("discord.base_url ne doit contenir ni query ni fragment")
@@ -152,7 +169,14 @@ def api_request(method, url, token, *, payload=None, expected_status, opener=Non
     if body is not None:
         headers["Content-Type"] = "application/json; charset=utf-8"
     request = urllib.request.Request(url, data=body, headers=headers, method=method)
-    open_request = opener or urllib.request.build_opener(NoRedirect).open
+    if opener is None:
+        handlers = [NoRedirect()]
+        if urllib.parse.urlsplit(url).scheme == "http":
+            # A loopback token must never be forwarded through a configured proxy.
+            handlers.insert(0, urllib.request.ProxyHandler({}))
+        open_request = urllib.request.build_opener(*handlers).open
+    else:
+        open_request = opener
     try:
         with open_request(request, timeout=15) as response:
             status = response.status

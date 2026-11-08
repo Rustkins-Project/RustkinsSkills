@@ -65,7 +65,7 @@ Les chemins sont propres au poste. L'URL `.invalid` est un exemple fictif, pas u
 - `python` ou `python3`, `git`, `gh`, `az`, extension `azure-devops`, authentification du compte et bon projet ; Rust/Cargo pour le skill Activity existant.
 - Ne pas forcer la connexion Azure/GitHub au moment d'installer un skill non concerné ; afficher un état par skill et le remède recommandé.
 - La configuration Azure doit pointer sur le bon projet avant tout appel de mutation. Ne jamais supposer qu'un `az devops configure` précédent correspond au projet Rustkins.
-- Les appels HTTP Discord exigent HTTPS, URL de base autorisée et token client externe à la configuration JSON. Prévoir lecture sûre depuis variable d'environnement ou coffre OS.
+- Les appels Discord exigent HTTPS et un token client externe à la configuration JSON. Pour la recette locale uniquement, le client accepte HTTP sur les adresses littérales de boucle locale `127.0.0.1` et `::1` ; aucune autre adresse HTTP n'est autorisée. Prévoir une lecture sûre du token depuis une variable d'environnement ou un coffre OS.
 - La validation post-installation vérifie que Codex **et** Claude Code possèdent des copies fonctionnelles et identiques.
 
 ## Internationalisation et UTF-8

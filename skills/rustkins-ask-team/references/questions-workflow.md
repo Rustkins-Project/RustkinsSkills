@@ -4,7 +4,17 @@ Le script [`questions.py`](../scripts/questions.py) utilise uniquement la biblio
 
 ## Configuration
 
-Configurer `discord.base_url` avec une URL HTTPS via l'installateur `--discord-base-url` ou dans `~/.rustkins-skills/config.json`. Placer le jeton du développeur dans la variable d'environnement `RUSTKINS_DISCORD_AI_TOKEN`, jamais dans le dépôt, le JSON de configuration, la question ou une Activity. Le client refuse les redirections HTTP pour éviter de transmettre le jeton à une autre origine et fixe un délai de 15 secondes par requête.
+Configurer `discord.base_url` avec une URL HTTPS via l'installateur `--discord-base-url` ou dans `~/.rustkins-skills/config.json`. Pour la recette sur le bot Docker local, `http://127.0.0.1:8080/` est accepté ; l'exception HTTP ne concerne que les adresses littérales `127.0.0.1` et `::1`, jamais un hôte distant ou `localhost`. Le port du bot reste lié à la boucle locale. Placer le jeton du développeur dans la variable d'environnement `RUSTKINS_DISCORD_AI_TOKEN`, jamais dans le dépôt, le JSON de configuration, la question ou une Activity. Le client refuse les redirections HTTP pour éviter de transmettre le jeton à une autre origine et fixe un délai de 15 secondes par requête.
+
+Sur un poste où `RustkinsDiscordBot/.env` définit déjà `AI_CLIENT_0_TOKEN` pour le login GitHub du développeur, réutiliser **cette même valeur** dans le PowerShell qui lance le client ; `INTERNAL_API_SERVICE_TOKEN` ne donne pas accès aux questions :
+
+```powershell
+$line = Get-Content .env | Where-Object { $_ -like 'AI_CLIENT_0_TOKEN=*' } | Select-Object -First 1
+if (-not $line) { throw 'Jeton client IA absent' }
+$env:RUSTKINS_DISCORD_AI_TOKEN = $line.Substring('AI_CLIENT_0_TOKEN='.Length)
+```
+
+Ne pas afficher la variable ni ajouter le jeton à un argument de commande. Si la valeur du bot change, redémarrer le service avec la nouvelle configuration et actualiser le PowerShell client.
 
 Créer un fichier JSON UTF-8 **hors dépôt** avec les champs réels suivants :
 
