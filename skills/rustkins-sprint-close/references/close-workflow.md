@@ -14,6 +14,7 @@ Après la décision humaine, prépare un fichier JSON UTF-8 hors dépôt :
 ```json
 {
   "story_id": 142,
+  "expected_revision": 3,
   "decision": "accepted",
   "sprint": "Rustkins\\Sprint 1",
   "review_date": "2026-11-08",
@@ -23,6 +24,6 @@ Après la décision humaine, prépare un fichier JSON UTF-8 hors dépôt :
 }
 ```
 
-`decision` vaut `accepted` (transition `Resolved → Closed`) ou `rejected` (transition `Resolved → Active`, avec AC initial manqué dans `reason`). Les valeurs sont illustratives, jamais une décision réelle. Le `review_url` pointe vers la PR ou le document de compte rendu dans RustkinsDocs. Exécute `python -X utf8 "$HOME/.codex/skills/rustkins-boards/scripts/boards_ops.py" review-story --input <fichier.json>` (ou le chemin frère `.claude`), puis relis l'US et son historique. Après un timeout ou un rejet, relis l'état et la révision avant tout nouvel essai. Le script vérifie le type, l'itération, l'état, les AC, les Tasks enfants et la révision ; il ne peut pas juger la qualité de la démonstration ou la présence effective des participants.
+`decision` vaut `accepted` (transition `Resolved → Closed`) ou `rejected` (transition `Resolved → Active`, avec AC initial manqué dans `reason`). Les valeurs sont illustratives, jamais une décision réelle. `expected_revision` est la révision Azure examinée pendant la review : si elle a changé, réévalue la décision avec l'équipe avant une nouvelle tentative. Le `review_url` pointe vers la PR ou le document de compte rendu dans RustkinsDocs. Exécute `python -X utf8 "$HOME/.codex/skills/rustkins-boards/scripts/boards_ops.py" review-story --input <fichier.json>` (ou le chemin frère `.claude`), puis relis l'US et son historique. Après un timeout ou un rejet, relis l'état et la révision avant tout nouvel essai. Le script vérifie le type, l'itération, l'état, les AC, les Tasks enfants et la révision ; il ne peut pas juger la qualité de la démonstration ou la présence effective des participants.
 
 Pour les US reportées, Timothy valide la nouvelle itération et l'impact avant `set-iteration --id <id> --expected '<ancien sprint>' --to '<nouveau sprint>' --reason '<décision>'`. Une US `Resolved` non acceptée ne se déplace pas sans décision explicite sur son état. Les Tasks déjà `Closed` restent en place. Note séparément SP engagés, SP livrés par les US `Closed`, et SP non livrés.

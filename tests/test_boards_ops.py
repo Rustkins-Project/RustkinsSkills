@@ -215,7 +215,8 @@ class BoardsTests(unittest.TestCase):
 
     def test_review_acceptance_requires_resolved_story_and_closed_tasks(self):
         decision = {
-            "story_id": 142, "decision": "accepted", "sprint": "Rustkins\\Sprint 1",
+            "story_id": 142, "expected_revision": 3,
+            "decision": "accepted", "sprint": "Rustkins\\Sprint 1",
             "review_date": "2026-11-08", "participants": ["Timothy", "Alexis"],
             "review_url": "https://github.com/Rustkins-Project/RustkinsDocs/pull/7",
             "reason": "AC démontrés sur la plateforme de test",
@@ -241,10 +242,17 @@ class BoardsTests(unittest.TestCase):
             with self.assertRaisesRegex(boards.BoardError, "non Closed"):
                 boards.review_story(decision, CONFIG)
             mutate.assert_not_called()
+        with patch.object(boards, "item", return_value=story), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            with self.assertRaisesRegex(boards.BoardError, "relire"):
+                boards.review_story({**decision, "expected_revision": 2}, CONFIG)
+            mutate.assert_not_called()
 
     def test_review_rejection_returns_story_to_active_and_validates_decision(self):
         decision = {
-            "story_id": 142, "decision": "rejected", "sprint": "Rustkins\\Sprint 1",
+            "story_id": 142, "expected_revision": 3,
+            "decision": "rejected", "sprint": "Rustkins\\Sprint 1",
             "review_date": "2026-11-08", "participants": ["Loick"],
             "review_url": "https://github.com/Rustkins-Project/RustkinsDocs/pull/7",
             "reason": "AC initial non satisfait",

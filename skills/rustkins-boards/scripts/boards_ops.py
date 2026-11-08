@@ -303,6 +303,7 @@ def review_story(payload: Dict[str, Any], config: Dict[str, str]) -> int:
     if not isinstance(payload, dict):
         raise BoardError("Decision de review invalide : objet JSON attendu")
     story_id = payload.get("story_id")
+    expected_revision = payload.get("expected_revision")
     decision = payload.get("decision")
     sprint = payload.get("sprint")
     review_date = payload.get("review_date")
@@ -311,7 +312,9 @@ def review_story(payload: Dict[str, Any], config: Dict[str, str]) -> int:
     reason = payload.get("reason")
     parsed = urlparse(review_url) if isinstance(review_url, str) else None
     if (
-        type(story_id) is not int or story_id <= 0 or decision not in ("accepted", "rejected")
+        type(story_id) is not int or story_id <= 0
+        or type(expected_revision) is not int or expected_revision <= 0
+        or decision not in ("accepted", "rejected")
         or not isinstance(sprint, str) or not sprint.startswith(config["project"] + "\\")
         or not isinstance(review_date, str) or not isinstance(participants, list) or not participants
         or any(not isinstance(person, str) or not person.strip() for person in participants)
@@ -320,7 +323,7 @@ def review_story(payload: Dict[str, Any], config: Dict[str, str]) -> int:
         or parsed.username or parsed.password
         or not isinstance(reason, str) or not reason.strip()
     ):
-        raise BoardError("Decision de review incomplete : US, sprint, date, participants, URL et motif requis")
+        raise BoardError("Decision de review incomplete : US, revision, sprint, date, participants, URL et motif requis")
     try:
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", review_date):
             raise ValueError("format")
@@ -329,7 +332,8 @@ def review_story(payload: Dict[str, Any], config: Dict[str, str]) -> int:
         raise BoardError("Date de review invalide (YYYY-MM-DD)") from None
     current = item(story_id, config)
     fields = current["fields"]
-    if fields.get("System.WorkItemType") != "User Story" or fields.get("System.State") != "Resolved":
+    if (current["rev"] != expected_revision or fields.get("System.WorkItemType") != "User Story"
+            or fields.get("System.State") != "Resolved"):
         raise BoardError(f"AB#{story_id} doit etre une User Story Resolved ; relire avant de reessayer")
     if fields.get("System.IterationPath") != sprint or not fields.get("Microsoft.VSTS.Common.AcceptanceCriteria"):
         raise BoardError(f"Sprint ou criteres d'acceptation de AB#{story_id} non verifies")
