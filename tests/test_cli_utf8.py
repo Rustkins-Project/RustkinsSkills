@@ -30,7 +30,9 @@ class CliUtf8Tests(unittest.TestCase):
                     returncode=0, stdout="{}", stderr=""
                 )) as run:
                     cli_utf8.run_json("az", ["version", "-o", "json"])
-        self.assertEqual(run.call_args.args[0][:3], [str(root / "python.exe"), "-IBm", "azure.cli"])
+        self.assertEqual(run.call_args.args[0][:5], [
+            str(root / "python.exe"), "-X", "utf8", "-IBm", "azure.cli"
+        ])
         self.assertFalse(run.call_args.kwargs["shell"])
     def test_az_json_preserves_unicode_and_uses_no_shell(self):
         payload = {"title": FRENCH, "description": "<p>É & œ</p>"}

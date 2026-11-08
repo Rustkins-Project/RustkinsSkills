@@ -94,6 +94,12 @@ class BoardsTests(unittest.TestCase):
             self.assertEqual(151, boards.create_task(PAYLOAD, CONFIG))
             run.assert_not_called()
 
+    def test_azure_paragraph_spacing_is_accepted_without_ignoring_content(self):
+        expected = boards.task_description(PAYLOAD["deliverable"], PAYLOAD["done_criteria"])
+        actual = expected.replace("</p>", " </p>")
+        self.assertTrue(boards.same_task_description(actual, expected))
+        self.assertFalse(boards.same_task_description(actual.replace("Tests passés", "Tests ratés"), expected))
+
     def test_rejects_unparented_duplicate(self):
         story = work_item(142, "User Story", "US", parent=40)
         task = work_item(151, "Task", PAYLOAD["title"], description=boards.task_description(

@@ -71,6 +71,14 @@ def task_description(deliverable: str, done_criteria: List[str]) -> str:
     )
 
 
+def same_task_description(actual: Any, expected: str) -> bool:
+    """Azure may insert trailing spaces inside paragraph tags on write."""
+    if not isinstance(actual, str):
+        return False
+    trim_paragraph_end = lambda value: re.sub(r"[ \t]+(?=</p>)", "", value)
+    return trim_paragraph_end(actual) == trim_paragraph_end(expected)
+
+
 def matching_tasks(parent: int, title: str, config: Dict[str, str]) -> List[Dict[str, Any]]:
     def quoted(value: str) -> str:
         return value.replace("'", "''")
@@ -117,7 +125,7 @@ def existing_task(parent: int, title: str, description: str, config: Dict[str, s
     if len(matches) != 1 or parent_id(matches[0]) != parent:
         raise BoardError("Task candidate ambiguë ou sans parent ; vérifier les work items avant tout nouvel essai")
     candidate = matches[0]
-    if candidate["fields"].get("System.Description") != description:
+    if not same_task_description(candidate["fields"].get("System.Description"), description):
         raise BoardError(f"AB#{candidate['id']} a le même titre mais un livrable différent")
     return candidate["id"]
 
@@ -175,7 +183,7 @@ def create_task(payload: Dict[str, Any], config: Dict[str, str]) -> int:
     if (
         created_fields.get("System.WorkItemType") != "Task"
         or created_fields.get("System.Title") != title
-        or created_fields.get("System.Description") != description
+        or not same_task_description(created_fields.get("System.Description"), description)
         or created_fields.get("System.AssignedTo")
     ):
         raise BoardError(f"AB#{task_id} créé avec des champs inattendus ; vérifier avant de continuer")
