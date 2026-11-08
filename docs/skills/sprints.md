@@ -41,7 +41,7 @@ Trois développeurs sur leur temps libre ; pas de Daily obligatoire. Les disponi
 **Entrées** : sprint, US `Resolved`, AC, tests, environnement de test, PR, décideurs humains, décisions de review, constats de rétrospective.
 
 1. Préparer la Sprint Review depuis les preuves réelles, signaler les US non éligibles ; générer une trame de validation.
-2. Pendant/après la review, **recueillir la décision humaine pour chaque US** ; seulement alors passer `Resolved → Closed` via `rustkins-boards`, en consign ant la décision dans le compte rendu.
+2. Pendant/après la review, **recueillir la décision humaine pour chaque US** ; seulement alors passer `Resolved → Closed` via `rustkins-boards`, en consignant la décision dans le compte rendu.
 3. Si un AC/DoD initial échoue : remettre à `Active` sur décision traçable ; si l'US est conforme mais qu'une amélioration nouvelle est demandée, proposer un nouveau work item.
 4. Rédiger `review.md` et `retrospective.md` sous `docs/project-management/sprints/<sprint>/` dans RustkinsDocs ; participants, date, objectifs, décisions, preuves, constats et actions.
 5. Identifier les US inachevées, leurs Tasks ouvertes et états `Blocked`/`On Hold` ; préparer le report pour validation du responsable backlog. Déplacer uniquement après validation, sans refermer/réouvrir artificiellement des Tasks terminées.
