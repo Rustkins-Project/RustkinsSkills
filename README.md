@@ -4,6 +4,24 @@ Skills partagés par Codex et Claude Code pour les dépôts Rustkins. Le premier
 
 Les deux agents reçoivent **les mêmes instructions**, le même profil humain, le même clone RustkinsActivity et le même dossier de brouillons. La recherche contextuelle et les décisions de reprise sont dans le skill ; le format, la validation, les opérations ciblées, le verrou et Git restent dans RustkinsActivity. Les règles transverses Azure sont dans RustkinsDocs.
 
+## Roadmap des skills (conception, non encore implémentée)
+
+Le dépôt contient aujourd'hui seulement le skill opérationnel `rustkins-activity`. Les autres skills ci-dessous sont **spécifiés mais pas encore disponibles** ; ne pas supposer qu'ils sont installés ou testés.
+
+| Premier lot | Objectif |
+| --- | --- |
+| `rustkins-activity` (existant) | Journal Git via la CLI RustkinsActivity |
+| `rustkins-boards` (à créer) | Azure Boards via `az` ; Tasks, US, Bugs, états, relations, DoR/DoD |
+| `rustkins-work` (à créer) | Développement autonome jusqu'à la PR ; Git/`gh`, tests, review humaine |
+| `rustkins-ask-team` (à créer) | Questions et réponses validées via l'API privée RustkinsDiscordBot |
+| `rustkins-knowledge` (à créer) | Recherche/contribution à RustkinsDocs, ADR proposées par PR |
+
+Ensuite : `rustkins-sprint-planning`, `rustkins-sprint-status` et `rustkins-sprint-close`.
+
+**Dossiers de conception :** [architecture](docs/architecture.md), [plan d'implémentation](docs/implementation-plan.md), [installation et qualité UTF-8](docs/installation-and-quality.md) et [contrats de chaque skill](docs/skills/). Les comportements sont soumis à la gouvernance de RustkinsDocs, notamment les critères de Sprint Review.
+
+Choix structurants : `gh` et `az` en priorité ; API directe seulement lorsque pertinente (notamment Discord) ; **pas de dépendance à RustkinsMCP**, pas de versionnement individuel des skills, et français/Unicode pris en charge dans tous les scripts. La review et le merge des PR restent humains.
+
 ## Prérequis
 
 - Python 3 et Rust/Cargo, plus Git avec accès à `Rustkins-Project/RustkinsActivity`.
