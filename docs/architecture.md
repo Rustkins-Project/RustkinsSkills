@@ -1,6 +1,6 @@
 # Architecture cible de RustkinsSkills
 
-> **Statut :** architecture cible ; les jalons 1 à 6 sont implémentés dans RustkinsSkills. Le parcours intégré et les skills de sprint restent à livrer.
+> **Statut :** architecture cible ; les jalons 1 à 6 et les skills de sprint du jalon 8 sont implémentés. La recette intégrée du jalon 7 a vérifié les liens et transitions GitHub/Azure ainsi que la réponse Discord validée ; les cas de sprint demandent encore une recette sur une itération réelle.
 > **Périmètre :** outillage des trois développeurs avec Codex et Claude Code ; ce projet n'est pas le moteur CI/CD Rustkins.
 
 ## Principes validés

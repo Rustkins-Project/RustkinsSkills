@@ -1,6 +1,6 @@
 # Spécifications — les trois skills de sprint
 
-> **Statut :** à implémenter **après le premier lot de cinq skills**. Ces skills s'appuient sur `rustkins-boards` et `rustkins-knowledge`. Les règles de référence figurent dans [RustkinsDocs/sprint-process](https://github.com/Rustkins-Project/RustkinsDocs/blob/main/docs/project-management/sprint-process.md).
+> **Statut :** implémenté au jalon 8 dans [`rustkins-sprint-planning`](../../skills/rustkins-sprint-planning/SKILL.md), [`rustkins-sprint-status`](../../skills/rustkins-sprint-status/SKILL.md) et [`rustkins-sprint-close`](../../skills/rustkins-sprint-close/SKILL.md). Ces skills s'appuient sur `rustkins-boards` et `rustkins-knowledge`. Les règles de référence figurent dans [RustkinsDocs/sprint-process](https://github.com/Rustkins-Project/RustkinsDocs/blob/main/docs/project-management/sprint-process.md).
 
 ## Gouvernance commune
 

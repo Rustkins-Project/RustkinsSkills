@@ -1,6 +1,6 @@
 # Installation commune, configuration et qualité
 
-> **Statut :** les jalons 1 et 2 (installateur et socle CLI/UTF-8) sont implémentés. Les nouveaux skills et leurs intégrations restent au stade de plan.
+> **Statut :** l'installateur et le socle CLI/UTF-8 sont implémentés ; les huit skills du premier lot et des sprints sont présents. Les scénarios de sprint attendent une recette sur une itération réelle.
 
 ## Structure de dépôt cible
 
@@ -19,12 +19,15 @@ RustkinsSkills/
 │   │   └── scripts/               # seulement si nécessaires
 │   ├── rustkins-work/
 │   ├── rustkins-ask-team/
-│   └── rustkins-knowledge/
+│   ├── rustkins-knowledge/
+│   ├── rustkins-sprint-planning/
+│   ├── rustkins-sprint-status/
+│   └── rustkins-sprint-close/
 ├── docs/                           # spécifications et plan
 └── tests/
 ```
 
-Les trois futurs skills `rustkins-sprint-*` seront ajoutés plus tard sous `skills/`. Les contrats partagés peuvent vivre dans un petit module `scripts/` commun **seulement si** plusieurs skills ont un besoin technique identique, avec installation/prérequis documentés ; éviter un framework local générique.
+Les trois skills `rustkins-sprint-*` sont découverts par le même installateur. Les mutations Azure réutilisent le script de `rustkins-boards` et ses gardes de révision ; aucun framework local supplémentaire n'est nécessaire.
 
 ## Installation et mises à jour
 
@@ -107,9 +110,9 @@ Conserver le fichier en cas d'échec pour comparer le contenu et réessayer. Cet
 
 ### Helpers disponibles au jalon 2
 
-[`shared/cli_utf8.py`](../shared/cli_utf8.py) fournit `run_cli("az", args)` ou `run_cli("gh", args)`, ainsi que `run_json(...)`, avec `subprocess.run` sans shell, délai de 30 secondes par défaut, sortie strictement UTF-8 et `PYTHONIOENCODING=utf-8` pour les outils Python. Sur Windows, il résout `az.cmd` ou `gh.exe` via `shutil.which` ; pour le lanceur MSI `az.cmd`, il appelle directement le Python embarqué afin de préserver les arguments sans les faire interpréter par `cmd.exe`. Le préflight de l'installateur résout aussi `az.cmd`, avec ses arguments fixes. Aucun retry n'est automatique. Un échec donne une `CliError` qui ne contient ni arguments, ni sortie, ni environnement ; le code retour reste indiqué. Le texte de succès est renvoyé à l'appelant et peut contenir des données sensibles : ne pas le journaliser sans examen.
+[`shared/cli_utf8.py`](../shared/cli_utf8.py) fournit `run_cli("az", args)` ou `run_cli("gh", args)`, ainsi que `run_json(...)`, avec `subprocess.run` sans shell, délai de 30 secondes par défaut, sortie strictement UTF-8 et `PYTHONIOENCODING=utf-8` pour les outils Python. Sur Windows, il résout `az.cmd` ou `gh.exe` via `shutil.which` ; pour le lanceur MSI `az.cmd`, il appelle directement le Python embarqué avec `-X utf8 -IBm azure.cli` afin de préserver les arguments et la sortie UTF-8 malgré `-I`, qui ignore les variables `PYTHON*`. Le préflight de l'installateur résout aussi `az.cmd`, avec ses arguments fixes. Aucun retry n'est automatique. Un échec donne une `CliError` qui ne contient ni arguments, ni sortie, ni environnement ; le code retour reste indiqué. Le texte de succès est renvoyé à l'appelant et peut contenir des données sensibles : ne pas le journaliser sans examen.
 
-Les fonctions `read_utf8`, `write_utf8`, `read_json`, `write_json`, `plain_text_to_html` et `temporary_markdown` préservent les accents, sauts de ligne et chemins Unicode. `plain_text_to_html` prend **du texte brut**, échappe les caractères HTML et transforme les sauts de ligne en `<br>` ; elle ne convertit pas du Markdown ou du HTML riche. `temporary_markdown` ferme le fichier avant l'appel CLI, notamment sous Windows, puis le supprime après usage. Les scripts des futurs skills peuvent importer le module depuis `~/.rustkins-skills/shared/` ; leurs contrôles d'authentification, de contexte Azure et de mutation restent à implémenter dans leurs jalons.
+Les fonctions `read_utf8`, `write_utf8`, `read_json`, `write_json`, `plain_text_to_html` et `temporary_markdown` préservent les accents, sauts de ligne et chemins Unicode. `plain_text_to_html` prend **du texte brut**, échappe les caractères HTML et transforme les sauts de ligne en `<br>` ; elle ne convertit pas du Markdown ou du HTML riche. `temporary_markdown` ferme le fichier avant l'appel CLI, notamment sous Windows, puis le supprime après usage. Les scripts des skills importent ce module depuis `~/.rustkins-skills/shared/` et contrôlent leurs propres mutations.
 
 ## Pratiques d'intégration
 

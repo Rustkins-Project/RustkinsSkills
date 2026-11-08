@@ -1,6 +1,6 @@
 # Plan d'implémentation de RustkinsSkills
 
-> **Plan de cadrage** : les jalons 1 et 2 fournissent l'installateur et les helpers locaux ; les jalons 3 à 6 fournissent les quatre nouveaux skills du premier lot. Le parcours intégré et l'automatisation de sprint restent prévus pour les jalons suivants.
+> **Plan de cadrage** : les jalons 1 et 2 fournissent l'installateur et les helpers locaux ; les jalons 3 à 6 fournissent les quatre nouveaux skills du premier lot. Le jalon 7 a couvert un parcours intégré réel sur données de test ; le jalon 8 fournit les trois skills de sprint. Leur recette sur une itération réelle reste à faire.
 > **Principe de livraison :** jalons fonctionnels indépendants, PR de code courtes et revues humaines ; pas de versionnement par skill.
 
 ## Hypothèses et prérequis
@@ -26,7 +26,7 @@
 | **7 — Premier parcours intégré** | Ajustements et tests d'acceptation inter-skills, documentation du poste | 3–6 | Scénarios end-to-end décrits ci-dessous réussis sur données de test |
 | **8 — Sprint skills** | `rustkins-sprint-planning`, `rustkins-sprint-status`, `rustkins-sprint-close` (trois PR possibles) | 3,6,7 | Planning validé, suivi fiable, review/rétro et report dans les règles Azure |
 
-Les cinq skills sont le **premier lot fonctionnel** ; les skills de sprint restent explicitement prévus, mais peuvent être développés après la stabilisation des opérations de base.
+Les cinq skills constituent le **premier lot fonctionnel**. Les trois skills de sprint forment le jalon 8, après la stabilisation des opérations de base.
 
 ## Critères de livraison par étape
 
