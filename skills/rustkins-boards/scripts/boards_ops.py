@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 from urllib.parse import quote, urlparse
 
 sys.path.insert(0, str(Path.home() / ".rustkins-skills" / "shared"))
-from cli_utf8 import CliError, plain_text_to_html, read_json, run_json, write_json
+from cli_utf8 import CliError, plain_text_to_html, read_json, run_cli, run_json, write_json
 
 
 class BoardError(RuntimeError):
@@ -81,10 +81,18 @@ def matching_tasks(parent: int, title: str, config: Dict[str, str]) -> List[Dict
         "[System.WorkItemType] = 'Task' AND "
         f"[System.Title] = '{quoted(title)}'"
     )
-    result = run_json("az", [
+    output = run_cli("az", [
         "boards", "query", "--wiql", wiql, "--org", config["organization"],
         "--project", config["project"], "-o", "json",
     ])
+    if not output.strip():
+        return []
+    try:
+        result = json.loads(output)
+    except json.JSONDecodeError:
+        raise BoardError("Résultat de recherche Azure non JSON") from None
+    if result is None:
+        return []
     if not isinstance(result, list):
         raise BoardError("Résultat de recherche Azure inattendu")
     matches = []

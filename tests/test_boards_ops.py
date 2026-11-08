@@ -64,11 +64,25 @@ class BoardsTests(unittest.TestCase):
         matching = work_item(3, "Task", PAYLOAD["title"], parent=142)
         def fake_run(tool, args):
             self.assertIn("l''exécution", args[3])
-            return [{"id": 2}, {"id": 3}]
-        with patch.object(boards, "run_json", side_effect=fake_run), patch.object(
+            return json.dumps([{"id": 2}, {"id": 3}])
+        with patch.object(boards, "run_cli", side_effect=fake_run), patch.object(
             boards, "item", side_effect=[other, matching]
         ):
             self.assertEqual([3], [x["id"] for x in boards.matching_tasks(142, PAYLOAD["title"], CONFIG)])
+
+    def test_empty_successful_query_has_no_candidates(self):
+        with patch.object(boards, "run_cli", return_value=""):
+            self.assertEqual([], boards.matching_tasks(142, "Titre nouveau", CONFIG))
+        with patch.object(boards, "run_cli", return_value="null\n"):
+            self.assertEqual([], boards.matching_tasks(142, "Titre nouveau", CONFIG))
+
+    def test_failed_or_invalid_query_does_not_become_no_candidates(self):
+        with patch.object(boards, "run_cli", side_effect=boards.CliError("az failed")):
+            with self.assertRaises(boards.CliError):
+                boards.matching_tasks(142, "Titre nouveau", CONFIG)
+        with patch.object(boards, "run_cli", return_value="unexpected output"):
+            with self.assertRaises(boards.BoardError):
+                boards.matching_tasks(142, "Titre nouveau", CONFIG)
 
     def test_reuses_exact_existing_task_without_creating(self):
         story = work_item(142, "User Story", "US", parent=40)
