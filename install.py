@@ -15,6 +15,7 @@ from pathlib import Path
 SKILLS_DIR = Path(__file__).resolve().parent / "skills"
 PROFILES = ("Timothy", "Alexis", "Loick")
 CLIENTS = (".codex", ".claude")
+ACTIVITY_KEYS = ("profile", "author", "activity_clone", "drafts_dir")
 
 
 def discover_skills():
@@ -121,10 +122,14 @@ def install(args):
     if not isinstance(previous, dict):
         raise ValueError(f"Configuration invalide : {config_file}")
     values = dict(previous)
-    for key in ("profile", "author", "activity_clone", "drafts_dir", "docs_clone"):
+    activity_values = dict(previous)
+    for key in ACTIVITY_KEYS:
         value = getattr(args, key, None)
         if value is not None:
-            values[key] = value
+            activity_values[key] = value
+    docs_clone = getattr(args, "docs_clone", None)
+    if docs_clone is not None:
+        values["docs_clone"] = docs_clone
     for section, key, option in (
         ("azure", "organization", "azure_organization"),
         ("azure", "project", "azure_project"),
@@ -139,6 +144,8 @@ def install(args):
     skills = discover_skills()
     if not skills:
         raise ValueError(f"Aucun skill valide dans {SKILLS_DIR}")
+    if not any(skill.name == "rustkins-activity" for skill in skills):
+        values.update({key: activity_values[key] for key in ACTIVITY_KEYS if key in activity_values})
     available = []
     unavailable = []
     activity_clone = None
@@ -149,12 +156,13 @@ def install(args):
             continue
         if skill.name == "rustkins-activity":
             try:
-                clone = activity_configuration(values, create_drafts=False)
+                clone = activity_configuration(activity_values, create_drafts=False)
                 if not getattr(args, "check", False):
                     check_activity_cli(clone, setup=False)
             except (ValueError, OSError, subprocess.CalledProcessError) as error:
                 unavailable.append(f"{skill.name} : {error}")
                 continue
+            values.update({key: activity_values[key] for key in ACTIVITY_KEYS})
             activity_clone = clone
         available.append(skill)
     for message in unavailable:
@@ -188,14 +196,17 @@ def install(args):
             check_activity_cli(activity_clone, setup=True)
 
         staged_config = write_config_stage(config_file, values)
-        backup_root = config_file.parent / "backups" / uuid.uuid4().hex
+        backup_id = uuid.uuid4().hex
+        backup_roots = set()
         changed = []
         try:
             for client, name, target, staged in replacements:
-                backup = backup_root / client / name if target.exists() else None
+                backup_root = target.parent / ".rustkins-backups" / backup_id
+                backup = backup_root / name if target.exists() else None
                 if backup is not None:
                     backup.parent.mkdir(parents=True, exist_ok=True)
                     target.replace(backup)
+                    backup_roots.add(backup_root)
                 changed.append((target, backup))
                 staged.replace(target)
             staged_config.replace(config_file)
@@ -210,7 +221,7 @@ def install(args):
             staged_config.unlink(missing_ok=True)
         for _, _, target, _ in replacements:
             print(f"Skill installé : {target}")
-        if backup_root.exists():
+        for backup_root in sorted(backup_roots):
             print(f"Copies précédentes conservées : {backup_root}")
         print(f"Configuration commune : {config_file}")
     return unavailable

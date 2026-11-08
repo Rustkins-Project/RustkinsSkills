@@ -30,7 +30,7 @@ Les trois futurs skills `rustkins-sprint-*` seront ajoutés plus tard sous `skil
 - Les prérequis sont déclarés dans `skills/<nom>/requirements.json` par `commands` et, pour Azure, `azure_devops_extension`. Un skill indisponible est ignoré avec diagnostic et code retour non nul ; les autres sont installés.
 - Conserver le comportement existant : configuration locale persistante, profil réel, auteur Git, clone de RustkinsActivity, brouillons hors clone, installation sans argument après mise à jour.
 - Préserver les modifications locales de configuration, jamais écraser les tokens ; ne pas déplacer les brouillons/journal d'Activity par surprise.
-- Préparer toutes les copies dans des dossiers temporaires voisins des destinations, puis remplacer les copies installées. Les anciennes copies modifiées sont conservées sous `~/.rustkins-skills/backups/` ; un échec de remplacement restaure les copies précédentes.
+- Préparer toutes les copies dans des dossiers temporaires voisins des destinations, puis remplacer les copies installées. Les anciennes copies modifiées sont conservées dans `<client>/skills/.rustkins-backups/` sur le même volume ; un échec de remplacement restaure les copies précédentes. Les sauvegardes de l'ancienne version sous `~/.rustkins-skills/backups/` restent intactes.
 - **Pas de versionnement de skills**, manifest semver, mécanisme de compatibilité ni auto-update en arrière-plan. Procédure : `git pull --ff-only` puis `python install.py` depuis le clone local ; redémarrer le client si nécessaire.
 - `install.py --check` vérifie les commandes déclarées, l'extension Azure si demandée, et les chemins/configuration Activity sans installer ni exécuter `setup`. Les connexions et permissions distantes ne sont pas vérifiées à ce stade.
 

@@ -96,11 +96,13 @@ class InstallTests(unittest.TestCase):
             first = self.target(".codex", "rustkins-activity")
             self.assertTrue((first / "references" / "cli.md").is_file())
             install.install(args())
-            self.assertFalse((self.home / ".rustkins-skills" / "backups").exists())
+            self.assertFalse((self.home / ".codex" / "skills" / ".rustkins-backups").exists())
             (skill / "SKILL.md").write_text("nouveau\n", encoding="utf-8")
             install.install(args())
             self.assertEqual((first / "SKILL.md").read_text(encoding="utf-8"), "nouveau\n")
-            backups = list((self.home / ".rustkins-skills" / "backups").glob("*/.codex/rustkins-activity/SKILL.md"))
+            backups = list((self.home / ".codex" / "skills" / ".rustkins-backups").glob(
+                "*/rustkins-activity/SKILL.md"
+            ))
             self.assertEqual(len(backups), 1)
             self.assertEqual(backups[0].read_text(encoding="utf-8"), "ancien\n")
             self.assertEqual(run.call_count, 6)
@@ -123,9 +125,36 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(config["profile"], "Timothy")
         self.assertEqual(config["custom"], {"clé": "É"})
         self.assertEqual(config["azure"], {"organization": "https://new", "extra": "gardé"})
-        backups = list((self.home / ".rustkins-skills" / "backups").glob("*/.codex/rustkins-work/notes privées.md"))
+        backups = list((self.home / ".codex" / "skills" / ".rustkins-backups").glob(
+            "*/rustkins-work/notes privées.md"
+        ))
         self.assertEqual(len(backups), 1)
         self.assertEqual(backups[0].read_text(encoding="utf-8"), "à garder\n")
+
+    def test_invalid_activity_override_does_not_replace_previous_settings(self):
+        make_skill(self.skills, "rustkins-activity")
+        make_skill(self.skills, "rustkins-work")
+        clone = self.root / "valid-activity"
+        clone.mkdir()
+        (clone / "Cargo.toml").touch()
+        (clone / ".git").mkdir()
+        config_file = self.home / ".rustkins-skills" / "config.json"
+        config_file.parent.mkdir(parents=True)
+        previous = {
+            "profile": "Timothy", "author": "original",
+            "activity_clone": str(clone), "drafts_dir": str(self.root / "drafts"),
+        }
+        config_file.write_text(json.dumps(previous), encoding="utf-8")
+        installed_activity = self.target(".codex", "rustkins-activity")
+        installed_activity.mkdir(parents=True)
+        (installed_activity / "SKILL.md").write_text("existing\n", encoding="utf-8")
+        missing = install.install(args(
+            author="rejected", activity_clone=str(self.root / "missing-clone")
+        ))
+        self.assertIn("rustkins-activity", missing[0])
+        self.assertEqual(self.config(), previous)
+        self.assertEqual((installed_activity / "SKILL.md").read_text(encoding="utf-8"), "existing\n")
+        self.assertTrue((self.target(".claude", "rustkins-work") / "SKILL.md").is_file())
 
     def test_optional_requirements_do_not_block_other_skills(self):
         make_skill(self.skills, "free")
@@ -147,7 +176,30 @@ class InstallTests(unittest.TestCase):
         for client in install.CLIENTS:
             self.assertTrue((self.target(client, "later") / "SKILL.md").exists())
             self.assertTrue((self.target(client, "first") / "SKILL.md").exists())
-        self.assertFalse((self.home / ".rustkins-skills" / "backups").exists())
+        self.assertFalse((self.home / ".codex" / "skills" / ".rustkins-backups").exists())
+
+    def test_backup_rename_stays_on_destination_filesystem(self):
+        make_skill(self.skills, "one", "updated\n")
+        targets = []
+        for client in install.CLIENTS:
+            target = self.target(client, "one")
+            target.mkdir(parents=True)
+            (target / "SKILL.md").write_text("previous\n", encoding="utf-8")
+            targets.append(target)
+        original_replace = Path.replace
+
+        def reject_cross_device_backup(path, destination):
+            if path in targets and path.parent not in Path(destination).parents:
+                raise OSError(18, "Invalid cross-device link")
+            return original_replace(path, destination)
+
+        with patch.object(Path, "replace", reject_cross_device_backup):
+            install.install(args())
+        for target in targets:
+            self.assertEqual((target / "SKILL.md").read_text(encoding="utf-8"), "updated\n")
+            backups = list((target.parent / ".rustkins-backups").glob("*/one/SKILL.md"))
+            self.assertEqual(len(backups), 1)
+            self.assertEqual(backups[0].read_text(encoding="utf-8"), "previous\n")
 
     def test_azure_extension_is_checked_only_when_declared(self):
         make_skill(self.skills, "free")

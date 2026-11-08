@@ -42,13 +42,13 @@ Les champs futurs sont facultatifs : `--docs-clone`, `--azure-organization`, `--
 
 ## Mise à jour
 
-Mettre à jour le clone RustkinsSkills avec `git pull --ff-only`, puis relancer `python install.py` ou `python3 install.py` **sans arguments**. Les réglages existants sont conservés ; pour changer une valeur, repasser uniquement son option. Une copie installée identique est laissée en place. Si son contenu change, l'ancien dossier est conservé dans `~/.rustkins-skills/backups/<identifiant>/<client>/<skill>` avant remplacement. Vérifier ces sauvegardes avant de les supprimer manuellement.
+Mettre à jour le clone RustkinsSkills avec `git pull --ff-only`, puis relancer `python install.py` ou `python3 install.py` **sans arguments**. Les réglages existants sont conservés ; pour changer une valeur, repasser uniquement son option. Une copie installée identique est laissée en place. Si son contenu change, l'ancien dossier est conservé dans `~/.codex/skills/.rustkins-backups/<identifiant>/<skill>` ou `~/.claude/skills/.rustkins-backups/<identifiant>/<skill>`, sur le même volume que la destination. Les sauvegardes créées par une version précédente sous `~/.rustkins-skills/backups/` restent en place. Vérifier ces sauvegardes avant de les supprimer manuellement.
 
 Un skill dont les prérequis manquent est signalé et ignoré ; les autres sont installés. La commande retourne alors un code non nul. L'installateur prépare toutes les copies avant remplacement et restaure les anciens dossiers si un remplacement échoue.
 
 ## Diagnostic et ajout d'un skill
 
-Lancer `python install.py --check` (ou `python3` sous Linux) pour vérifier les outils déclarés et la configuration Activity sans installer. Cette vérification ne lance pas `setup` et ne valide pas les connexions distantes. En cas d'erreur, lire le diagnostic du skill, puis vérifier les droits d'écriture de `~/.codex/skills`, `~/.claude/skills` et `~/.rustkins-skills`. Après une interruption, relancer l'installation ; les copies précédentes sous `backups/` permettent une restauration manuelle.
+Lancer `python install.py --check` (ou `python3` sous Linux) pour vérifier les outils déclarés et la configuration Activity sans installer. Cette vérification ne lance pas `setup` et ne valide pas les connexions distantes. En cas d'erreur, lire le diagnostic du skill, puis vérifier les droits d'écriture de `~/.codex/skills`, `~/.claude/skills` et `~/.rustkins-skills`. Après une interruption, relancer l'installation ; les copies précédentes sous `.rustkins-backups/` permettent une restauration manuelle.
 
 Pour ajouter un skill, créer `skills/<nom>/SKILL.md` et placer ses ressources relatives dans ce dossier. Un fichier facultatif `requirements.json` peut déclarer `{"commands": ["git", "gh"]}` ou `{"commands": ["az"], "azure_devops_extension": true}`. L'installateur copie le dossier entier sans modification de son code. L'authentification et les permissions restent à contrôler lors de l'utilisation du skill.
 
