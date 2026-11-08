@@ -213,6 +213,40 @@ class BoardsTests(unittest.TestCase):
                 boards.set_iteration(142, "Rustkins\\Sprint 1", "Rustkins\\Sprint 2", "Report", CONFIG)
             mutate.assert_not_called()
 
+    def test_carryover_moves_only_approved_unfinished_child_task(self):
+        task = work_item(151, "Task", parent=142, state="Active")
+        story = work_item(142, "User Story", state="Active")
+        story["fields"]["System.IterationPath"] = "Rustkins\\Sprint 2"
+        moved = work_item(151, "Task", parent=142, state="Active", rev=4)
+        moved["fields"]["System.IterationPath"] = "Rustkins\\Sprint 2"
+        with patch.object(boards, "item", side_effect=[task, story, moved]), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            self.assertEqual(151, boards.set_task_iteration(
+                151, 142, "Rustkins\\Sprint 1", "Rustkins\\Sprint 2", "Report validé", CONFIG
+            ))
+            mutate.assert_called_once_with(
+                task, "System.IterationPath", "Rustkins\\Sprint 2", CONFIG, "Report validé"
+            )
+        for bad_task in (work_item(151, "Task", parent=142, state="Closed"),
+                         work_item(151, "Task", parent=999, state="Active")):
+            with patch.object(boards, "item", return_value=bad_task), patch.object(
+                boards, "revision_patch"
+            ) as mutate:
+                with self.assertRaises(boards.BoardError):
+                    boards.set_task_iteration(
+                        151, 142, "Rustkins\\Sprint 1", "Rustkins\\Sprint 2", "Report", CONFIG
+                    )
+                mutate.assert_not_called()
+        story["fields"]["System.IterationPath"] = "Rustkins\\Sprint 1"
+        with patch.object(boards, "item", side_effect=[task, story]), patch.object(
+            boards, "revision_patch"
+        ) as mutate:
+            with self.assertRaisesRegex(boards.BoardError, "sprint cible"):
+                boards.set_task_iteration(
+                    151, 142, "Rustkins\\Sprint 1", "Rustkins\\Sprint 2", "Report", CONFIG
+                )
+            mutate.assert_not_called()
     def test_review_acceptance_requires_resolved_story_and_closed_tasks(self):
         decision = {
             "story_id": 142, "expected_revision": 3,

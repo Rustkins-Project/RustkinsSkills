@@ -298,6 +298,36 @@ def set_iteration(story_id: int, expected: str, target: str, reason: str,
     return story_id
 
 
+def set_task_iteration(task_id: int, story_id: int, expected: str, target: str,
+                       reason: str, config: Dict[str, str]) -> int:
+    """Carry an approved unfinished child Task after its parent US has moved."""
+    prefix = config["project"] + "\\"
+    if (task_id <= 0 or story_id <= 0 or not expected or not target.startswith(prefix)
+            or not target[len(prefix):] or not reason.strip()):
+        raise BoardError("Task, parent, iteration ou motif invalide")
+    task = item(task_id, config)
+    fields = task["fields"]
+    if (fields.get("System.WorkItemType") != "Task"
+            or fields.get("System.State") not in ("New", "Active", "Blocked", "On Hold")
+            or parent_id(task) != story_id or fields.get("System.IterationPath") != expected):
+        raise BoardError(f"Task AB#{task_id} modifiee, terminee ou hors de la US ; relire avant de reessayer")
+    story = item(story_id, config)
+    story_fields = story["fields"]
+    if (story_fields.get("System.WorkItemType") != "User Story"
+            or story_fields.get("System.State") not in ("New", "Active", "Blocked", "On Hold")
+            or story_fields.get("System.IterationPath") != target):
+        raise BoardError(f"US AB#{story_id} non confirmee dans le sprint cible")
+    if expected == target:
+        return task_id
+    try:
+        revision_patch(task, "System.IterationPath", target, config, reason)
+    except CliError:
+        raise BoardError(f"Iteration de Task AB#{task_id} incertaine ; relire avant de reessayer") from None
+    if item(task_id, config)["fields"].get("System.IterationPath") != target:
+        raise BoardError(f"Iteration de Task AB#{task_id} non confirmee")
+    return task_id
+
+
 def review_story(payload: Dict[str, Any], config: Dict[str, str]) -> int:
     """Apply an explicit human Sprint Review decision to one resolved story."""
     if not isinstance(payload, dict):
@@ -379,6 +409,12 @@ def main() -> int:
     iteration.add_argument("--expected", required=True)
     iteration.add_argument("--to", required=True)
     iteration.add_argument("--reason", required=True)
+    task_iteration = commands.add_parser("set-task-iteration")
+    task_iteration.add_argument("--id", type=int, required=True)
+    task_iteration.add_argument("--parent-id", type=int, required=True)
+    task_iteration.add_argument("--expected", required=True)
+    task_iteration.add_argument("--to", required=True)
+    task_iteration.add_argument("--reason", required=True)
     review = commands.add_parser("review-story")
     review.add_argument("--input", type=Path, required=True, help="Decision humaine de Sprint Review en JSON UTF-8")
     args = parser.parse_args()
@@ -392,6 +428,8 @@ def main() -> int:
             task_id = set_progress(args.id, args.expected, args.to, args.reason, config)
         elif args.command == "set-iteration":
             task_id = set_iteration(args.id, args.expected, args.to, args.reason, config)
+        elif args.command == "set-task-iteration":
+            task_id = set_task_iteration(args.id, args.parent_id, args.expected, args.to, args.reason, config)
         else:
             task_id = review_story(read_json(args.input), config)
     except (BoardError, CliError, OSError, ValueError, json.JSONDecodeError) as error:
