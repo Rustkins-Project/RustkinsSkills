@@ -1,6 +1,6 @@
 # RustkinsSkills
 
-Skills partagés par Codex et Claude Code pour les dépôts Rustkins. Le premier skill, [`rustkins-activity`](skills/rustkins-activity/SKILL.md), gère le journal d'intervention au moyen de la CLI Rust de [RustkinsActivity](https://github.com/Rustkins-Project/RustkinsActivity). Le dépôt peut accueillir d'autres dossiers sous `skills/` sans modifier ce workflow.
+Skills partagés par Codex et Claude Code pour les dépôts Rustkins. Le premier skill, [`rustkins-activity`](skills/rustkins-activity/SKILL.md), gère le journal d'intervention au moyen de la CLI Rust de [RustkinsActivity](https://github.com/Rustkins-Project/RustkinsActivity). L'installateur découvre automatiquement les dossiers `skills/*/SKILL.md` et copie leurs ressources dans les deux clients.
 
 Les deux agents reçoivent **les mêmes instructions**, le même profil humain, le même clone RustkinsActivity et le même dossier de brouillons. La recherche contextuelle et les décisions de reprise sont dans le skill ; le format, la validation, les opérations ciblées, le verrou et Git restent dans RustkinsActivity. Les règles transverses Azure sont dans RustkinsDocs.
 
@@ -24,8 +24,8 @@ Choix structurants : `gh` et `az` en priorité ; API directe seulement lorsque p
 
 ## Prérequis
 
-- Python 3 et Rust/Cargo, plus Git avec accès à `Rustkins-Project/RustkinsActivity`.
-- Un clone RustkinsActivity à jour par développeur, sur `main`, avec les commandes `discover`, `prepare-create`, `prepare-patch`, `publish` et `recover`.
+- Python 3 pour l'installateur. Chaque skill peut déclarer ses propres outils dans `requirements.json`.
+- Pour `rustkins-activity` : Git, Rust/Cargo et un clone RustkinsActivity à jour, sur `main`, avec les commandes `discover`, `prepare-create` et `prepare-patch`.
 - `user.name` et `user.email` Git configurés dans ce clone. La CLI `setup` active le hook pré-commit sans écraser un hook incompatible.
 
 ## Installation Windows et Linux
@@ -36,11 +36,21 @@ Cloner ce dépôt et RustkinsActivity. Depuis le dossier RustkinsSkills, lancer 
 python install.py --profile Timothy --author <login-GitHub> --activity-clone <chemin-RustkinsActivity> --drafts-dir <dossier-persistant-hors-clone>
 ```
 
-Remplacer `Timothy` par `Alexis` ou `Loick` selon le poste. L'installateur crée `~/.rustkins-skills/config.json`, active le hook du clone et copie exactement le même skill vers `~/.codex/skills/rustkins-activity` et `~/.claude/skills/rustkins-activity`. Le dossier de brouillons n'est ni dans le clone ni synchronisé automatiquement. Vérifier que l'agent peut lire ce fichier et exécuter Cargo/Git. Relancer les agents après installation si leurs skills ont été chargés au démarrage.
+Remplacer `Timothy` par `Alexis` ou `Loick` selon le poste. L'installateur crée `~/.rustkins-skills/config.json`, active le hook du clone Activity et copie chaque skill disponible vers `~/.codex/skills/<nom>` et `~/.claude/skills/<nom>`. Le dossier de brouillons reste hors clone et n'est jamais effacé par l'installateur. Relancer les clients si leurs skills sont chargés au démarrage.
+
+Les champs futurs sont facultatifs : `--docs-clone`, `--azure-organization`, `--azure-project` et `--discord-base-url`. Ils alimentent respectivement `docs_clone`, `azure.organization`, `azure.project` et `discord.base_url` dans le même JSON UTF-8. Ne pas y placer de token ou de PAT. Les clés déjà présentes sont conservées si leurs options ne sont pas fournies.
 
 ## Mise à jour
 
-Mettre à jour les clones par la procédure Git habituelle, puis relancer `python install.py` ou `python3 install.py` **sans arguments** depuis RustkinsSkills. Le fichier de configuration existant conserve le profil, le login et les chemins. Pour changer une valeur, repasser uniquement son option. L'installateur remplace les copies installées du skill ; conserver les modifications locales dans ce dépôt source.
+Mettre à jour le clone RustkinsSkills avec `git pull --ff-only`, puis relancer `python install.py` ou `python3 install.py` **sans arguments**. Les réglages existants sont conservés ; pour changer une valeur, repasser uniquement son option. Une copie installée identique est laissée en place. Si son contenu change, l'ancien dossier est conservé dans `~/.rustkins-skills/backups/<identifiant>/<client>/<skill>` avant remplacement. Vérifier ces sauvegardes avant de les supprimer manuellement.
+
+Un skill dont les prérequis manquent est signalé et ignoré ; les autres sont installés. La commande retourne alors un code non nul. L'installateur prépare toutes les copies avant remplacement et restaure les anciens dossiers si un remplacement échoue.
+
+## Diagnostic et ajout d'un skill
+
+Lancer `python install.py --check` (ou `python3` sous Linux) pour vérifier les outils déclarés et la configuration Activity sans installer. Cette vérification ne lance pas `setup` et ne valide pas les connexions distantes. En cas d'erreur, lire le diagnostic du skill, puis vérifier les droits d'écriture de `~/.codex/skills`, `~/.claude/skills` et `~/.rustkins-skills`. Après une interruption, relancer l'installation ; les copies précédentes sous `backups/` permettent une restauration manuelle.
+
+Pour ajouter un skill, créer `skills/<nom>/SKILL.md` et placer ses ressources relatives dans ce dossier. Un fichier facultatif `requirements.json` peut déclarer `{"commands": ["git", "gh"]}` ou `{"commands": ["az"], "azure_devops_extension": true}`. L'installateur copie le dossier entier sans modification de son code. L'authentification et les permissions restent à contrôler lors de l'utilisation du skill.
 
 ## Utilisation
 
