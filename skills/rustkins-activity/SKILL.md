@@ -7,7 +7,7 @@ description: Journalise automatiquement les interventions de développement Rust
 
 Applique ce workflow lorsque tu interviens sur un dépôt Rustkins. Le même skill et le même fichier `~/.rustkins-skills/config.json` sont installés pour Codex et Claude Code. Lis la configuration : `profile` et `author` identifient le développeur humain ; `agent` vaut `codex` ou `claude-code` **uniquement lors de la création**. Ne change jamais ces champs sur une activité reprise.
 
-La source de vérité métier est `RustkinsActivity/docs/activity-workflow.md`. La CLI du clone configuré possède la validation, la préparation durable, la publication Git et la récupération. Exécute-la depuis `activity_clone` : `cargo run --quiet -- <commande>` (ou le binaire compilé équivalent). Passe toujours `--drafts-dir` avec la valeur configurée. Ne rédige jamais directement sous `activities/` et ne publie jamais ces fiches avec tes propres commandes Git.
+La source de vérité métier est `RustkinsActivity/docs/activity-workflow.md`. La CLI du clone configuré possède la validation, la préparation durable, la publication Git et la récupération. Exécute-la depuis `activity_clone` : `cargo activity <commande>` (ou le binaire compilé équivalent). Passe toujours `--drafts-dir` avec la valeur configurée. Ne rédige jamais directement sous `activities/` et ne publie jamais ces fiches avec tes propres commandes Git.
 
 ## Avant le travail
 
