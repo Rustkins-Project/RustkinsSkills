@@ -1,13 +1,13 @@
 # Contrat CLI pour les agents
 
-Toutes les commandes ci-dessous s'exécutent dans le clone configuré de RustkinsActivity, avec `cargo activity` avant la sous-commande. Les chemins JSON peuvent être absolus. La configuration commune `~/.rustkins-skills/config.json` contient `profile`, `author`, `activity_clone`, `drafts_dir`.
+Toutes les commandes ci-dessous s'exécutent avec `python "$HOME/.rustkins-skills/shared/activity.py"` sous PowerShell ou `python3 "$HOME/.rustkins-skills/shared/activity.py"` sous Linux avant la sous-commande, depuis n'importe quel dossier. Les chemins JSON peuvent être absolus. Le lanceur et la CLI lisent directement la configuration commune `~/.rustkins-skills/config.json` contenant `profile`, `author`, `activity_clone`, `drafts_dir`.
 
 ```text
-recover --drafts-dir <dossier>
-discover --drafts-dir <dossier> --profile Timothy
-prepare-create --drafts-dir <dossier> --input <fichier.json>
-prepare-patch --drafts-dir <dossier> --input <fichier.json>
-publish --drafts-dir <dossier> <operation_id>
+recover
+discover
+prepare-create --input <fichier.json>
+prepare-patch --input <fichier.json>
+publish <operation_id>
 validate
 ```
 
@@ -18,8 +18,6 @@ Exemple de création (l'agent adapte le contenu aux faits réels) :
 ```json
 {
   "title": "Corriger la validation des activités",
-  "profile": "Timothy",
-  "author": "T-Rogier",
   "agent": "codex",
   "repositories": ["Rustkins-Project/RustkinsActivity"],
   "activity_type": "bugfix",
