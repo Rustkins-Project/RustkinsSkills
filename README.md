@@ -1,12 +1,12 @@
 # RustkinsSkills
 
-Huit skills partagés par Codex et Claude Code pour les dépôts Rustkins : journal d'intervention, Azure Boards, développement, questions à l'équipe, connaissance et trois workflows de sprint. L'installateur découvre automatiquement les dossiers `skills/*/SKILL.md` et copie leurs ressources dans les deux clients.
+Dix skills partagés par Codex et Claude Code pour les dépôts Rustkins : les huit skills historiques (activité, Azure Boards, développement, questions, connaissance et sprint), plus deux skills spécialisés pour les documents et les ADR. L'installateur découvre automatiquement les dossiers `skills/*/SKILL.md` et copie leurs ressources dans les deux clients.
 
 Les deux agents reçoivent **les mêmes instructions**, le même profil humain, le même clone RustkinsActivity et le même dossier de brouillons. La recherche contextuelle et les décisions de reprise sont dans le skill ; le format, la validation, les opérations ciblées, le verrou et Git restent dans RustkinsActivity. Les règles transverses Azure sont dans RustkinsDocs.
 
 ## Skills disponibles
 
-Les cinq skills du premier lot et les trois skills de sprint sont disponibles.
+Les cinq skills du premier lot, les trois skills de sprint et les deux skills de rédaction documentaire sont disponibles.
 
 | Premier lot | Objectif |
 | --- | --- |
@@ -22,6 +22,11 @@ Les cinq skills du premier lot et les trois skills de sprint sont disponibles.
 | [`rustkins-sprint-status`](skills/rustkins-sprint-status/SKILL.md) | Consolider états Azure, PR/CI, dépendances et SP livrés |
 | [`rustkins-sprint-close`](skills/rustkins-sprint-close/SKILL.md) | Préparer review/rétro, appliquer les décisions humaines et gérer les reports |
 
+| Rédaction spécialisée | Objectif |
+| --- | --- |
+| [`rustkins-docs`](skills/rustkins-docs/SKILL.md) | Produire et mettre à jour les DOC/RUN de RustkinsDocs, puis valider et proposer une PR |
+| [`rustkins-adr`](skills/rustkins-adr/SKILL.md) | Rédiger les ADR proposées, comparer les alternatives, gérer les remplacements et préparer la revue humaine |
+
 **Documentation :** [architecture](docs/architecture.md), [bilan des jalons et scénarios de recette](docs/implementation-plan.md), [installation et qualité UTF-8](docs/installation-and-quality.md) et [contrats de chaque skill](docs/skills/). Les comportements sont soumis à la gouvernance de RustkinsDocs, notamment les critères de Sprint Review.
 
 Choix structurants : `gh` et `az` en priorité ; API directe seulement lorsque pertinente (notamment Discord) ; **pas de dépendance à RustkinsMCP**, pas de versionnement individuel des skills, et français/Unicode pris en charge dans tous les scripts. La review et le merge des PR restent humains.
@@ -34,6 +39,7 @@ Choix structurants : `gh` et `az` en priorité ; API directe seulement lorsque p
 - Pour `rustkins-work` : Git et GitHub CLI authentifié ; Azure CLI et le projet configuré si le travail concerne un work item.
 - Pour `rustkins-ask-team` : URL HTTPS du bot dans `discord.base_url` (HTTP limité à `127.0.0.1` ou `::1` pour la recette locale) et jeton client IA du développeur dans `RUSTKINS_DISCORD_AI_TOKEN` lors de l'envoi ou de la lecture.
 - Pour `rustkins-knowledge` : Git et un clone RustkinsDocs identifié ; `--docs-clone` permet de le configurer. `gh` authentifié est nécessaire pour ouvrir une PR documentaire.
+- Pour `rustkins-docs` et `rustkins-adr` : un clone RustkinsDocs vérifié, `git`, `gh` authentifié et Python pour exécuter le validateur. Le chemin `docs_clone` peut être défini avec `--docs-clone`.
 - Pour les skills de sprint : Azure CLI et extension `azure-devops` ; `git` pour le planning et la clôture documentaire, `gh` pour le suivi des PR/CI et la clôture.
 - `user.name` et `user.email` Git configurés dans ce clone. La CLI `setup` active le hook pré-commit sans écraser un hook incompatible.
 
@@ -94,6 +100,8 @@ Pour consulter l'équipe sur une décision manquante, invoquer `$rustkins-ask-te
 Pour un sprint, invoquer `$rustkins-sprint-planning`, `$rustkins-sprint-status` ou `$rustkins-sprint-close` selon l'étape ; les [guides opérationnels](skills/rustkins-sprint-planning/SKILL.md) et les [spécifications communes](docs/skills/sprints.md) décrivent les décisions humaines requises. Les scénarios ont été vérifiés par tests automatisés ; aucune recette complète sur une itération Azure réelle avec Sprint Review n'est encore documentée.
 
 Pour rechercher une décision ou contribuer à RustkinsDocs, invoquer `$rustkins-knowledge` dans Codex ou `/rustkins-knowledge` dans Claude Code. Le [guide de recherche](skills/rustkins-knowledge/references/search.md) distingue les statuts et versions ; le [guide de contribution](skills/rustkins-knowledge/references/contribute.md) couvre les templates, IDs, liens et PR. Une ADR proposée nécessite la revue d'un autre humain avant fusion.
+
+Pour créer ou mettre à jour un document de référence ou un runbook, utiliser `$rustkins-docs` dans Codex ou `/rustkins-docs` dans Claude Code. Le [guide de rédaction](skills/rustkins-docs/references/document-workflow.md) couvre les types DOC/RUN, frontmatters, IDs, liens et validations. Pour proposer ou faire évoluer une décision d'architecture, utiliser `$rustkins-adr` ou `/rustkins-adr` : le [guide ADR](skills/rustkins-adr/references/adr-workflow.md) définit les statuts, alternatives, remplacements et garde-fous de revue. `rustkins-knowledge` reste le skill de recherche et de notes KNOW, et oriente vers ces deux parcours spécialisés lorsque le sujet demande une publication documentaire.
 
 ## Vérification après installation
 

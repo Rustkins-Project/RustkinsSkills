@@ -1,5 +1,7 @@
 # Contribuer à RustkinsDocs
 
+Pour la rédaction des DOC/RUN, suis le parcours spécialisé [rustkins-docs](../../rustkins-docs/SKILL.md) ; pour les nouvelles ADR, leur acceptation et leur supersession, [rustkins-adr](../../rustkins-adr/SKILL.md). Ce guide conserve le routage et la recherche documentaire transversale ainsi que les connaissances `KNOW`.
+
 Lis `docs/conventions/knowledge-management.md`, `INDEX.md` et le README du dossier cible avant de modifier le dépôt. Le [parcours de lecture](search.md) sert à retrouver les documents voisins et une éventuelle décision antérieure. Une intervention de développement suit aussi [rustkins-activity](../../rustkins-activity/SKILL.md) ; si elle est liée à une Task/US, [rustkins-boards](../../rustkins-boards/SKILL.md) garde le suivi Azure.
 
 ## Préparer le changement
@@ -13,7 +15,7 @@ Choisis la forme du document :
 | Décision de conception | `decisions/`, `templates/adr.md`, `schemas/adr.schema.json` | `proposed` ; `decided_at: null`, `approved_by: []` |
 | Solution ou observation réutilisable | `knowledge/`, `templates/knowledge.md`, `schemas/knowledge.schema.json` | `candidate` sans preuve ; `verified` avec vérification réelle et `verified_at` |
 | Spécification, architecture ou convention | dossier `docs/` approprié, `templates/document.md`, `schemas/document.schema.json` | `draft` jusqu'à validation effective ; tous les `README.md` sont exemptés de frontmatter |
-| Procédure opérationnelle | `docs/operations/`, `templates/runbook.md` et schéma applicable au document | Étapes et prérequis vérifiés, sans commande dangereuse implicite |
+| Procédure opérationnelle | `docs/operations/`, `templates/runbook.md` et `schemas/runbook.schema.json` (`RUN-xxxx`) | Étapes et prérequis vérifiés, sans commande dangereuse implicite |
 
 Renseigne `applies_to` avec la version du **produit Rustkins** (`V0`, `V1`, etc. ou `all` si réellement transversal). `specification_version` désigne un contrat YAML distinct. Préserve les références stables et les preuves ; une réponse validée de Discord est une référence, pas une approbation d'ADR. Si une ADR acceptée est remplacée, prépare une nouvelle ADR `proposed` avec `supersedes`, puis vérifie les liens réciproques utiles sans effacer l'historique. Ne convertis pas automatiquement les rubriques « ADR » historiques de l'architecture en décisions acceptées.
 

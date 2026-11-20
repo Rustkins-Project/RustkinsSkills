@@ -1,6 +1,6 @@
 # Installation commune, configuration et qualité
 
-> **Statut :** l'installateur et le socle CLI/UTF-8 sont implémentés ; les huit skills du premier lot et des sprints sont présents. Les scénarios de sprint attendent une recette sur une itération réelle.
+> **Statut :** l'installateur et le socle CLI/UTF-8 sont implémentés ; les huit skills historiques et les deux skills de rédaction documentaire sont présents. Les scénarios de sprint attendent une recette sur une itération réelle.
 
 ## Structure du dépôt
 
@@ -20,6 +20,8 @@ RustkinsSkills/
 │   ├── rustkins-work/
 │   ├── rustkins-ask-team/
 │   ├── rustkins-knowledge/
+│   ├── rustkins-docs/
+│   ├── rustkins-adr/
 │   ├── rustkins-sprint-planning/
 │   ├── rustkins-sprint-status/
 │   └── rustkins-sprint-close/
@@ -27,7 +29,7 @@ RustkinsSkills/
 └── tests/
 ```
 
-Les trois skills `rustkins-sprint-*` sont découverts par le même installateur. Les mutations Azure réutilisent le script de `rustkins-boards` et ses gardes de révision ; aucun framework local supplémentaire n'est nécessaire.
+Les skills `rustkins-docs`, `rustkins-adr` et les trois skills `rustkins-sprint-*` sont découverts par le même installateur. Les mutations Azure réutilisent le script de `rustkins-boards` et ses gardes de révision ; aucun framework local supplémentaire n'est nécessaire.
 
 ## Installation et mises à jour
 

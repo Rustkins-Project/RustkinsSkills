@@ -4,6 +4,8 @@
 
 ## Objectifs
 
+Pour une rédaction spécialisée de `DOC/RUN`, voir [rustkins-docs](rustkins-docs.md) ; pour une ADR, voir [rustkins-adr](rustkins-adr.md). `rustkins-knowledge` conserve la recherche et la production de notes `KNOW`.
+
 Rechercher et lire la documentation utile avant toute décision de conception ; contribuer à RustkinsDocs sans créer des doublons ; proposer ADR, connaissances, spécifications ou runbooks par PR lorsque c'est pertinent. Ne pas remplacer la recherche par des suppositions ni attribuer au MCP la fonction de moteur de recherche.
 
 ## Entrées et usages
