@@ -7,8 +7,8 @@
 
 1. **Cinq skills dans le premier lot** : `rustkins-activity` (existant), `rustkins-boards`, `rustkins-work`, `rustkins-ask-team`, `rustkins-knowledge`.
 2. **Trois skills de sprint disponibles** : `rustkins-sprint-planning`, `rustkins-sprint-status`, `rustkins-sprint-close`.
-4. **Deux skills de rédaction spécialisés** : `rustkins-docs` (DOC/RUN) et `rustkins-adr` (arbitrages avec revue humaine) ; `rustkins-knowledge` conserve la recherche et les connaissances KNOW.
-3. `gh` + `git` pour GitHub et les dépôts locaux, `az` + extension `azure-devops` pour Azure Boards. Les appels HTTP directs restent permis **en cas de besoin avéré** ; Discord Bot utilise nécessairement son API privée. Ne pas reconstruire un serveur intermédiaire.
+3. **Deux skills de rédaction spécialisés** : `rustkins-docs` (DOC/RUN) et `rustkins-adr` (arbitrages avec revue humaine) ; `rustkins-knowledge` conserve la recherche et les connaissances KNOW.
+4. `gh` + `git` pour GitHub et les dépôts locaux, `az` + extension `azure-devops` pour Azure Boards. Les appels HTTP directs restent permis **en cas de besoin avéré** ; Discord Bot utilise nécessairement son API privée. Ne pas reconstruire un serveur intermédiaire.
 5. `RustkinsMCP` est **historique seulement**, jamais une dépendance d'installation ou d'exécution ; ne pas réutiliser son journal SQLite.
 6. Les agents réalisent le développement jusqu'à la PR prête à revoir, **sans demander une validation supplémentaire** pour brancher, coder, tester, committer, pousser et ouvrir la PR. Review et merge humains, jamais par l'agent.
 7. **Pas de versionnement par skill** (ni manifest semver, ni négociation de compatibilité) : installation des fichiers du clone local de RustkinsSkills et mise à jour par `git pull` puis `install.py`.

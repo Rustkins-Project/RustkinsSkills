@@ -1,6 +1,6 @@
 ---
 name: rustkins-adr
-description: Prépare et met à jour les Architecture Decision Records (ADR) de RustkinsDocs : recherche d'arbitrages, contexte, alternatives, conséquences, supersession et PR avec revue humaine obligatoire, sans accepter ou fusionner une décision à la place de l'équipe.
+description: "Prépare et met à jour les Architecture Decision Records (ADR) de RustkinsDocs : recherche d'arbitrages, contexte, alternatives, conséquences, supersession et PR avec revue humaine obligatoire, sans accepter ou fusionner une décision à la place de l'équipe."
 ---
 
 # Rédiger et proposer une ADR Rustkins
