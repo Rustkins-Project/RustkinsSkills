@@ -5,7 +5,7 @@ description: Recherche les décisions, spécifications et connaissances Rustkins
 
 # Connaissance et décisions Rustkins
 
-Utilise ce skill pour répondre depuis RustkinsDocs à une question de conception, documenter une solution durable ou proposer une ADR. Lis [la recherche et les niveaux d'autorité](references/search.md) pour une lecture ; lis aussi [la contribution documentaire](references/contribute.md) avant toute écriture. Le dépôt RustkinsDocs est la source de vérité des documents, Azure Boards celle du backlog et RustkinsActivity celle des interventions.
+Utilise ce skill pour répondre depuis RustkinsDocs à une question de conception, documenter une solution durable ou **orienter** une proposition d'ADR. Pour rédiger directement des DOC/RUN, applique [rustkins-docs](../rustkins-docs/SKILL.md) ; pour les nouvelles ADR et leurs remplacements, applique [rustkins-adr](../rustkins-adr/SKILL.md). Ce skill reste responsable de la recherche et des notes KNOW. Lis [la recherche et les niveaux d'autorité](references/search.md) pour une lecture ; lis aussi [la contribution documentaire](references/contribute.md) avant toute écriture. Le dépôt RustkinsDocs est la source de vérité des documents, Azure Boards celle du backlog et RustkinsActivity celle des interventions.
 
 ## Rechercher
 
@@ -15,7 +15,7 @@ Utilise ce skill pour répondre depuis RustkinsDocs à une question de conceptio
 
 ## Contribuer
 
-4. Avant de créer, recherche un document équivalent, ses liens et son identifiant. Choisis le type et le dossier selon RustkinsDocs : ADR dans `decisions/`, note réutilisable dans `knowledge/`, contrat dans `docs/specifications/`, conception dans `docs/architecture/`, procédure dans `docs/operations/`. Enrichis l'existant quand il couvre déjà le sujet.
+4. Avant de créer, recherche un document équivalent, ses liens et son identifiant. Choisis le type et le dossier selon RustkinsDocs : ADR dans `decisions/`, note réutilisable dans `knowledge/`, contrat dans `docs/specifications/`, conception dans `docs/architecture/`, procédure dans `docs/operations/`. Enrichis l'existant quand il couvre déjà le sujet. Oriente la rédaction spécialisée vers `rustkins-docs` ou `rustkins-adr` sans dupliquer leurs règles.
 5. Travaille dans une branche ou un worktree d'écriture distinct, sur une base à jour. Pars du template et du schéma du dépôt ; préserve l'ID stable, `status`, `applies_to`, les preuves et les liens. Une ADR nouvelle ou supersédante reste `proposed` avec `approved_by: []` et `decided_at: null` ; une connaissance sans preuve reste `candidate`.
 6. Vérifie frontmatter, IDs, liens relatifs, index et références modifiés ; exécute les contrôles disponibles sans déclarer un succès non mesuré. Committe, pousse et ouvre une PR normale avec un corps Markdown UTF-8 vérifié. Une ADR exige l'approbation d'un **autre humain** avant fusion ; aucune ADR n'est acceptée ou fusionnée par l'agent. Les autres PR documentaires restent soumises au workflow humain du dépôt.
 
