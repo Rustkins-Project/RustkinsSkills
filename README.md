@@ -110,7 +110,7 @@ Exécuter les tests du dépôt des skills, puis ceux de la CLI Rust (chaque comm
 ```bash
 python -m unittest discover -s tests -v
 cargo test
-cargo run -- validate
+cargo activity validate
 ```
 
 Pour la recette fonctionnelle, utiliser **un remote Git de test isolé**, ou une véritable intervention autorisée à journaliser (éviter les fausses fiches dans le journal officiel, car les activités clôturées sont immuables). Demander à Codex de créer puis publier une activité, vérifier sa présence sur `origin/main`, la faire reprendre par Claude Code sur le même poste, puis la clôturer. Contrôler les références de PR et le résumé Discord si ce flux est configuré. Vérifier une erreur de publication en conservant le même `operation_id` et en utilisant `recover` ; ne pas créer de doublon.
